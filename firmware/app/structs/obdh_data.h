@@ -124,7 +124,7 @@
 #define OBDH_PARAM_MEDIA_LAST_SBCD_PKTS_DEFAULT_VAL     CONFIG_MEM_SBCD_PKTS_START_PAGE
 #define OBDH_PARAM_TS_READ_SENSORS_DEFAULT_VAL          0U
 #define OBDH_PARAM_TS_LAST_CONTACT_TIME_DEFAULT_VAL     0U
-
+#define OBDH_PARAM_MAGIC_NUMBER_VAL                     0xDEADBEEF
 /* Operation modes */
 #define OBDH_MODE_NORMAL            0U
 #define OBDH_MODE_HIBERNATION       1U
@@ -157,6 +157,8 @@ typedef struct
     uint32_t last_page_edc_data;    /**< Last used memory page of the EDC data. */
     uint32_t last_page_px_data;     /**< Last used memory page of the Payload-X data. */
     uint32_t last_page_sbcd_pkts;   /**< Last used memory page of the SBCD packets. */
+    uint32_t last_page_cimatelite_data; /**< Last used memory page of the Cimatelite packets. */
+    uint32_t media_data_magic_number; /**< Used to know if this structure is valid and initialized. */
 } media_data_t;
 
 /**

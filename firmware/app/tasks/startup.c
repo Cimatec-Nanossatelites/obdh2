@@ -143,6 +143,17 @@ void vTaskStartup(void *p)
                     if (mem_mng_load_obdh_data_from_fram(&sat_data_buf.obdh) == 0)
                     {
                         err = 0;
+                        /**
+                         * Check if its is first time of the microcontroller to access FRAM.
+                         */
+                        if(sat_data_buf.obdh.data.media.media_data_magic_number  !=  OBDH_PARAM_MAGIC_NUMBER_VAL){
+                            /**                             *
+                             * This is first microcontroller boot or this data structure is modified. Load the default values
+                             */
+                            mem_mng_load_obdh_data_from_default_values(&sat_data_buf.obdh); // Load the default values
+                            sat_data_buf.obdh.data.media.media_data_magic_number =  OBDH_PARAM_MAGIC_NUMBER_VAL; // Program the Magic Number
+                            mem_mng_save_obdh_data_to_fram(&sat_data_buf.obdh); // Save this data to FRAM
+                        }
 
                         if (system_reset_count() == 0)
                         {

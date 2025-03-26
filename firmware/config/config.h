@@ -121,6 +121,10 @@
 #define CONFIG_MEM_ADR_SYS_TIME_BAK                     0x1980U
 #define CONFIG_MEM_ADR_SYS_PARAM_BAK                    0x1900U
 
+#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE                  500000U
+#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE                    510000U
+
+
 /* Health Check Config Parameters */
 #if defined(CONFIG_HEALTH_CHECK_ENABLED) && (CONFIG_HEALTH_CHECK_ENABLED == 1)
 

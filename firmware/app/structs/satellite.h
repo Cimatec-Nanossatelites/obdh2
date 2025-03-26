@@ -176,6 +176,16 @@ typedef struct
 } payload_telemetry_t;
 
 /**
+ * \brief CIMATELITE Data type.
+ */
+typedef struct
+{
+    sys_time_t timestamp;           /**< Timestamp of the Payload data. */
+    int32_t Temperatura;
+    int32_t Humidity;
+} cimatelite_telemetry_t;
+
+/**
  * \brief Payloads state type.
  */
 typedef struct
@@ -197,6 +207,7 @@ typedef struct
     payload_telemetry_t edc_1;      /**< EDC 1 telemetry. */
     payload_telemetry_t payload_x;  /**< Payload-X telemetry. */
     payload_state_t state;          /**< Payload state. */
+    cimatelite_telemetry_t cimatelite;
 } sat_data_t;
 
 /**
