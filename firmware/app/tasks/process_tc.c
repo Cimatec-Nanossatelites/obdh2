@@ -251,6 +251,17 @@ static void process_tc_get_parameter(uint8_t *pkt, uint16_t pkt_len);
 static void process_tc_update_tle(uint8_t *pkt, uint16_t pkt_len);
 
 /**
+ * \brief Clear Cimatelite Data telecommand.
+ *
+ * \param[in] pkt is the packet to process.
+ *
+ * \param[in] pkt_len is the number of bytes of the given packet.
+ *
+ * \return None.
+ */
+static void process_tc_clear_cimatelite_data(uint8_t *pkt, uint16_t pkt_len);
+
+/**
  * \brief Transmit packet telecommand.
  *
  * \param[in] pkt is the packet to process.
@@ -421,6 +432,14 @@ void vTaskProcessTC(void *p)
                         process_tc_update_tle(pkt, pkt_len);
 
                         break;
+                    case PKT_ID_UPLINK_CLEAR_CIMATELITE:
+                       sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Executing the TC \"Update TLE\"...");
+                       sys_log_new_line();
+
+                       process_tc_update_tle(pkt, pkt_len);
+
+
+                       break;
                     default:
                         sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Unknown packet received!");
                         sys_log_new_line();
@@ -1694,6 +1713,41 @@ static void process_tc_get_parameter(uint8_t *pkt, uint16_t pkt_len)
         else
         {
             sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error executing the \"Get Parameter\" TC! Invalid key!");
+            sys_log_new_line();
+        }
+    }
+}
+
+static void process_tc_clear_cimatelite_data(uint8_t *pkt, uint16_t pkt_len){
+    int8_t err = 0;
+    uint32_t CimateliteSectorAddress = 0x1234567890; // TODO: Ajustar aqui o setor dos dados do cimatelite
+
+
+    if (pkt_len >= 29U)
+    {
+        uint8_t tc_key[16] = CONFIG_TC_KEY_ERASE_CIMATELITE_MEMORY; // cppcheck-suppress misra-c2012-7.4
+
+        if (process_tc_validate_hmac(pkt, 1U + 1U + 7U, &pkt[9], 20U, tc_key, sizeof(CONFIG_TC_KEY_ERASE_CIMATELITE_MEMORY)-1U))
+        {
+            /* Update last valid tc parameter */
+            sat_data_buf.obdh.data.last_valid_tc = pkt[0];
+            sat_data_buf.obdh.data.ts_last_contact = system_get_time();
+
+
+            if (media_erase(MEDIA_NOR, MEDIA_ERASE_SECTOR, CimateliteSectorAddress) != 0)
+            {
+                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error erasing Cimatelite memory!");
+                sys_log_new_line();
+                err = -1;
+            }
+                if (err == 0)
+            {
+                (void)send_tc_feedback(pkt);
+            }
+        }
+        else
+        {
+            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error executing the \"Erase Cimatelite Memory\" TC! Invalid key!");
             sys_log_new_line();
         }
     }

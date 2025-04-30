@@ -77,6 +77,7 @@ typedef enum {
     PKT_ID_UPLINK_GET_PARAM           =  0x4D,
     PKT_ID_UPLINK_TRANSMIT_PACKET     =  0x4E,
     PKT_ID_UPLINK_UPDATE_TLE          =  0x4F,
+    PKT_ID_UPLINK_CLEAR_CIMATELITE    =  0x50,
 } packet_id_e;
 
 /**
