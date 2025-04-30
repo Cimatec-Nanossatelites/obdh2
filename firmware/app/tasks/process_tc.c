@@ -436,8 +436,7 @@ void vTaskProcessTC(void *p)
                        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Executing the TC \"Update TLE\"...");
                        sys_log_new_line();
 
-                       process_tc_update_tle(pkt, pkt_len);
-
+                       process_tc_clear_cimatelite_data(pkt, pkt_len);
 
                        break;
                     default:
