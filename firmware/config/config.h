@@ -167,6 +167,8 @@
 #define CONFIG_DRV_ISIS_ANTENNA_ENABLED                 0
 #define CONFIG_DRV_SL_ANTENNA_ENABLED                   0
 
+#define PAYLOAD_MAX_TRANSMIT                            10
+
 #endif
 
 #if defined (CONFIG_TASK_HEALTH_CHECK_MEM_ENABLED) && defined (CONFIG_HEALTH_CHECK_ENABLED) && \
