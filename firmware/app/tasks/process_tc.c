@@ -2195,6 +2195,9 @@ static void process_tc_get_payload_count(uint8_t *pkt, uint16_t pkt_len)
                 - CONFIG_MEM_CIMATELITE_DATA_START_PAGE;
         const uint8_t count_size = 4;
 
+        sat_data_buf.obdh.data.last_valid_tc = pkt[0];
+        sat_data_buf.obdh.data.ts_last_contact = system_get_time();
+
         fsat_pkt_add_id(&pkt_broacast, PKT_ID_DOWNLINK_GET_PAYLOAD_COUNT);
         (void) fsat_pkt_add_callsign(&pkt_broacast,
         CONFIG_SATELLITE_CALLSIGN);
@@ -2237,7 +2240,7 @@ static void process_tc_get_payload_packets(uint8_t *pkt, uint16_t pkt_len)
 
     memcpy(tc_data, pkt, sizeof(tc_data));
 
-    if (tc_data.size <= 10)
+    if (tc_data.size <= 6)
     {
 
         uint8_t tc_key[16] = CONFIG_TC_KEY_TRANSMIT_CIMATELTIE_PACKET;
@@ -2253,6 +2256,9 @@ static void process_tc_get_payload_packets(uint8_t *pkt, uint16_t pkt_len)
             uint32_t page =
                     sat_data_buf.obdh.data.media.last_page_cimatelite_data
                             - tc_data.start_addr;
+
+            sat_data_buf.obdh.data.last_valid_tc = pkt[0];
+            sat_data_buf.obdh.data.ts_last_contact = system_get_time();
 
             for (int i = 0; i < tc_data.size; i++)
             {
@@ -2834,6 +2840,7 @@ static int8_t send_tc_feedback(uint8_t *pkt)
                                         "Transmitting \"TC Feedback\"...");
         sys_log_new_line();
 
+        //TODO: ALTERAR PARA TTC1
         if (ttc_send(TTC_0, feedback_pkt, feedback_pkt_len) != 0)
         {
             sys_log_print_event_from_module(
