@@ -146,6 +146,7 @@ void mem_mng_load_obdh_data_from_default_values(obdh_telemetry_t *tel)
     tel->data.media.last_page_edc_data      = OBDH_PARAM_MEDIA_LAST_EDC_DATA_DEFAULT_VAL;
     tel->data.media.last_page_px_data       = OBDH_PARAM_MEDIA_LAST_PX_DATA_DEFAULT_VAL;
     tel->data.media.last_page_sbcd_pkts     = OBDH_PARAM_MEDIA_LAST_SBCD_PKTS_DEFAULT_VAL;
+    tel->data.media.last_page_cimatelite_data = OBDH_PARAM_MEDIA_LAST_CIMATELITE_DEFAULT_VAL;
 }
 
 int mem_mng_save_obdh_data_to_fram(obdh_telemetry_t *tel)
