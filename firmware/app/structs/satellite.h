@@ -82,6 +82,7 @@ typedef enum {
     PKT_ID_DOWNLINK_GET_PAYLOAD_COUNT = 0x52,
     PKT_ID_UPLINK_GET_PAYLOAD_PACKETS = 0x53,
     PKT_ID_DOWNLINK_GET_PAYLOAD_PACKETS = 0x54,
+    PKT_ID_UPLINK_PCD_TRANSMIT_PAYLOAD = 0x55,
 
 } packet_id_e;
 
@@ -181,14 +182,28 @@ typedef struct
     uint8_t data[220];              /**< Payload data. */
 } payload_telemetry_t;
 
+
+/**
+ * \brief PCD data buffer.
+ */
+
+typedef struct
+{
+    uint8_t ID;
+    uint8_t humidity;
+    uint8_t precipitation;
+    uint8_t temperature;
+    uint8_t wind_direction;
+    uint8_t wind_speed;
+} PCD_data_T;
+
 /**
  * \brief CIMATELITE Data type.
  */
 typedef struct
 {
     sys_time_t timestamp;           /**< Timestamp of the Payload data. */
-    int32_t Temperatura;
-    int32_t Humidity;
+    PCD_data_T data;
 } cimatelite_telemetry_t;
 
 /**
@@ -214,7 +229,9 @@ typedef struct
     payload_telemetry_t payload_x;  /**< Payload-X telemetry. */
     payload_state_t state;          /**< Payload state. */
     cimatelite_telemetry_t cimatelite;
+//    payload_telemetry_t cimatelite;
 } sat_data_t;
+
 
 /**
  * \brief Satellite data buffer.

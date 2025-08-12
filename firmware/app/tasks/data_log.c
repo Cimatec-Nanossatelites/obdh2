@@ -49,23 +49,26 @@ xTaskHandle xTaskDataLogHandle;
 
 void vTaskDataLog(void *p)
 {
-    (void)p;
+    (void) p;
 
     /* Wait startup task to finish */
-    (void)xEventGroupWaitBits(task_startup_status, TASK_STARTUP_DONE, pdFALSE, pdTRUE, pdMS_TO_TICKS(TASK_DATA_LOG_INIT_TIMEOUT_MS));
+    (void) xEventGroupWaitBits(task_startup_status, TASK_STARTUP_DONE, pdFALSE,
+    pdTRUE,
+                               pdMS_TO_TICKS(TASK_DATA_LOG_INIT_TIMEOUT_MS));
 
     /* Wait 5 minutes before saving data for the first time */
     vTaskDelay(pdMS_TO_TICKS(TASK_DATA_LOG_INITIAL_DELAY_MS));
 
     media_info_t nor_info = media_get_info(MEDIA_NOR);
 
-    uint8_t page_buf[256] = {0};
+    uint8_t page_buf[256] = { 0 };
 
     TickType_t last_cycle = xTaskGetTickCount();
 
-    while(1)
+    while (1)
     {
-        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Saving data to flash memory...");
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                                        "Saving data to flash memory...");
         sys_log_new_line();
 
         /* Update OBDH timestamp atomically */
@@ -74,134 +77,218 @@ void vTaskDataLog(void *p)
         taskEXIT_CRITICAL();
 
         /* OBDH data */
-        (void)memcpy(&page_buf[0], (void*)&sat_data_buf.obdh, sizeof(obdh_telemetry_t));
-        if (mem_mng_write_data_to_flash_page(page_buf, &sat_data_buf.obdh.data.media.last_page_obdh_data, nor_info.page_size, CONFIG_MEM_OBDH_DATA_START_PAGE, CONFIG_MEM_OBDH_DATA_END_PAGE) == 0)
+        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.obdh,
+                      sizeof(obdh_telemetry_t));
+        if (mem_mng_write_data_to_flash_page(
+                page_buf, &sat_data_buf.obdh.data.media.last_page_obdh_data,
+                nor_info.page_size, CONFIG_MEM_OBDH_DATA_START_PAGE,
+                CONFIG_MEM_OBDH_DATA_END_PAGE) == 0)
         {
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Writing to OBDH sector, flash page number: ");
+            sys_log_print_event_from_module(
+                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                    "Writing to OBDH sector, flash page number: ");
             sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_obdh_data);
+            sys_log_new_line();
+
+            uint8_t saved_pkt[230] = { 0 };
+            obdh_telemetry_t obdh_tele = { 0 };
+
+            media_read(MEDIA_NOR,
+                       (sat_data_buf.obdh.data.media.last_page_obdh_data - 1),
+                       saved_pkt, sizeof(obdh_telemetry_t));
+
+            memcpy(&obdh_tele, saved_pkt, sizeof(obdh_telemetry_t));
+
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                                            "OBDH saved timestamp: ");
+            sys_log_print_uint(obdh_tele.timestamp);
+            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                                                        "OBDH Last Page Cimatelite Data: ");
+            sys_log_print_uint(obdh_tele.data.media.last_page_cimatelite_data);
             sys_log_new_line();
         }
         else
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_DATA_LOG_NAME, "Error writing the OBDH data to the flash memory!");
+            sys_log_print_event_from_module(
+                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
+                    "Error writing the OBDH data to the flash memory!");
             sys_log_new_line();
         }
 
-        (void)memset(&page_buf[0], 0, 256);
+        (void) memset(&page_buf[0], 0, 256);
 
         /* EPS data */
-        (void)memcpy(&page_buf[0], (void*)&sat_data_buf.eps, sizeof(eps_telemetry_t));
-        if (mem_mng_write_data_to_flash_page(page_buf, &sat_data_buf.obdh.data.media.last_page_eps_data, nor_info.page_size, CONFIG_MEM_EPS_DATA_START_PAGE, CONFIG_MEM_EPS_DATA_END_PAGE) == 0)
+        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.eps,
+                      sizeof(eps_telemetry_t));
+        if (mem_mng_write_data_to_flash_page(
+                page_buf, &sat_data_buf.obdh.data.media.last_page_eps_data,
+                nor_info.page_size, CONFIG_MEM_EPS_DATA_START_PAGE,
+                CONFIG_MEM_EPS_DATA_END_PAGE) == 0)
         {
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Writing to EPS sector, flash page number: ");
+            sys_log_print_event_from_module(
+                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                    "Writing to EPS sector, flash page number: ");
             sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_eps_data);
             sys_log_new_line();
         }
         else
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_DATA_LOG_NAME, "Error writing the EPS data to the flash memory!");
+            sys_log_print_event_from_module(
+                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
+                    "Error writing the EPS data to the flash memory!");
             sys_log_new_line();
         }
 
-        (void)memset(&page_buf[0], 0, 256);
+        (void) memset(&page_buf[0], 0, 256);
 
         /* TTC 0 data */
-        (void)memcpy(&page_buf[0], (void*)&sat_data_buf.ttc_0, sizeof(ttc_telemetry_t));
-        if (mem_mng_write_data_to_flash_page(page_buf, &sat_data_buf.obdh.data.media.last_page_ttc_0_data, nor_info.page_size, CONFIG_MEM_TTC_0_DATA_START_PAGE, CONFIG_MEM_TTC_0_DATA_END_PAGE) == 0)
+        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.ttc_0,
+                      sizeof(ttc_telemetry_t));
+        if (mem_mng_write_data_to_flash_page(
+                page_buf, &sat_data_buf.obdh.data.media.last_page_ttc_0_data,
+                nor_info.page_size, CONFIG_MEM_TTC_0_DATA_START_PAGE,
+                CONFIG_MEM_TTC_0_DATA_END_PAGE) == 0)
         {
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Writing to TTC 0 sector, flash page number: ");
-            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_ttc_0_data);
+            sys_log_print_event_from_module(
+                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                    "Writing to TTC 0 sector, flash page number: ");
+            sys_log_print_hex(
+                    sat_data_buf.obdh.data.media.last_page_ttc_0_data);
             sys_log_new_line();
         }
         else
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_DATA_LOG_NAME, "Error writing the TTC 0 data to the flash memory!");
+            sys_log_print_event_from_module(
+                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
+                    "Error writing the TTC 0 data to the flash memory!");
             sys_log_new_line();
         }
 
-        (void)memset(&page_buf[0], 0, 256);
+        (void) memset(&page_buf[0], 0, 256);
 
         /* TTC 1 data */
-        (void)memcpy(&page_buf[0], (void*)&sat_data_buf.ttc_1, sizeof(ttc_telemetry_t));
-        if (mem_mng_write_data_to_flash_page(page_buf, &sat_data_buf.obdh.data.media.last_page_ttc_1_data, nor_info.page_size, CONFIG_MEM_TTC_1_DATA_START_PAGE, CONFIG_MEM_TTC_1_DATA_END_PAGE) == 0)
+        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.ttc_1,
+                      sizeof(ttc_telemetry_t));
+        if (mem_mng_write_data_to_flash_page(
+                page_buf, &sat_data_buf.obdh.data.media.last_page_ttc_1_data,
+                nor_info.page_size, CONFIG_MEM_TTC_1_DATA_START_PAGE,
+                CONFIG_MEM_TTC_1_DATA_END_PAGE) == 0)
         {
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Writing to TTC 1 sector, flash page number: ");
-            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_ttc_1_data);
+            sys_log_print_event_from_module(
+                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                    "Writing to TTC 1 sector, flash page number: ");
+            sys_log_print_hex(
+                    sat_data_buf.obdh.data.media.last_page_ttc_1_data);
             sys_log_new_line();
         }
         else
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_DATA_LOG_NAME, "Error writing the TTC 1 data to the flash emory!");
+            sys_log_print_event_from_module(
+                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
+                    "Error writing the TTC 1 data to the flash emory!");
             sys_log_new_line();
         }
 
-        (void)memset(&page_buf[0], 0, 256);
+        (void) memset(&page_buf[0], 0, 256);
 
         /* Antenna data */
-        (void)memcpy(&page_buf[0], (void*)&sat_data_buf.antenna, sizeof(antenna_telemetry_t));
-        if (mem_mng_write_data_to_flash_page(page_buf, &sat_data_buf.obdh.data.media.last_page_ant_data, nor_info.page_size, CONFIG_MEM_ANT_DATA_START_PAGE, CONFIG_MEM_ANT_DATA_END_PAGE) == 0)
+        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.antenna,
+                      sizeof(antenna_telemetry_t));
+        if (mem_mng_write_data_to_flash_page(
+                page_buf, &sat_data_buf.obdh.data.media.last_page_ant_data,
+                nor_info.page_size, CONFIG_MEM_ANT_DATA_START_PAGE,
+                CONFIG_MEM_ANT_DATA_END_PAGE) == 0)
         {
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Writing to Antenna sector, flash page number: ");
+            sys_log_print_event_from_module(
+                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                    "Writing to Antenna sector, flash page number: ");
             sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_ant_data);
             sys_log_new_line();
         }
         else
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_DATA_LOG_NAME, "Error writing the antenna data to the flash memory!");
+            sys_log_print_event_from_module(
+                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
+                    "Error writing the antenna data to the flash memory!");
             sys_log_new_line();
         }
 
-        (void)memset(&page_buf[0], 0, 256);
+        (void) memset(&page_buf[0], 0, 256);
 
         /* EDC data */
-        (void)memcpy(&page_buf[0], (void*)sat_data_buf.state.c_edc, sizeof(payload_telemetry_t));
-        if (mem_mng_write_data_to_flash_page(page_buf, &sat_data_buf.obdh.data.media.last_page_edc_data, nor_info.page_size, CONFIG_MEM_EDC_DATA_START_PAGE, CONFIG_MEM_EDC_DATA_END_PAGE) == 0)
+        (void) memcpy(&page_buf[0], (void*) sat_data_buf.state.c_edc,
+                      sizeof(payload_telemetry_t));
+        if (mem_mng_write_data_to_flash_page(
+                page_buf, &sat_data_buf.obdh.data.media.last_page_edc_data,
+                nor_info.page_size, CONFIG_MEM_EDC_DATA_START_PAGE,
+                CONFIG_MEM_EDC_DATA_END_PAGE) == 0)
         {
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Writing to EDC sector, flash page number: ");
+            sys_log_print_event_from_module(
+                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                    "Writing to EDC sector, flash page number: ");
             sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_edc_data);
             sys_log_new_line();
         }
         else
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_DATA_LOG_NAME, "Error writing the EDC data to the flash memory!");
+            sys_log_print_event_from_module(
+                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
+                    "Error writing the EDC data to the flash memory!");
             sys_log_new_line();
         }
 
-        (void)memset(&page_buf[0], 0, 256);
+        (void) memset(&page_buf[0], 0, 256);
 
         /* Payload-X data */
-        (void)memcpy(&page_buf[0], (void*)&sat_data_buf.payload_x, sizeof(payload_telemetry_t));
-        if (mem_mng_write_data_to_flash_page(page_buf, &sat_data_buf.obdh.data.media.last_page_px_data, nor_info.page_size, CONFIG_MEM_PX_DATA_START_PAGE, CONFIG_MEM_PX_DATA_END_PAGE) == 0)
-        {
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Writing to Payload X sector, flash page number: ");
-            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_px_data);
-            sys_log_new_line();
-        }
-        else
-        {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_DATA_LOG_NAME, "Error writing the Payload-X data to the flash memory!");
-            sys_log_new_line();
-        }
+//        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.payload_x,
+//                      sizeof(payload_telemetry_t));
+//        if (mem_mng_write_data_to_flash_page(
+//                page_buf, &sat_data_buf.obdh.data.media.last_page_px_data,
+//                nor_info.page_size, CONFIG_MEM_PX_DATA_START_PAGE,
+//                CONFIG_MEM_PX_DATA_END_PAGE) == 0)
+//        {
+//            sys_log_print_event_from_module(
+//                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+//                    "Writing to Payload X sector, flash page number: ");
+//            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_px_data);
+//            sys_log_new_line();
+//        }
+//        else
+//        {
+//            sys_log_print_event_from_module(
+//                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
+//                    "Error writing the Payload-X data to the flash memory!");
+//            sys_log_new_line();
+//        }
+//        (void) memset(&page_buf[0], 0, 256);
 
-        (void)memset(&page_buf[0], 0, 256);
 
         /* Plinio Data */
-        (void)memcpy(&page_buf[0], &sat_data_buf.cimatelite, sizeof(cimatelite_telemetry_t));
-        if (mem_mng_write_data_to_flash_page(page_buf, &sat_data_buf.obdh.data.media.last_page_cimatelite_data, nor_info.page_size, CONFIG_MEM_CIMATELITE_DATA_START_PAGE, CONFIG_MEM_CIMATELITE_DATA_END_PAGE) == 0)
+        (void) memcpy(&page_buf[0], &sat_data_buf.cimatelite,
+                      sizeof(cimatelite_telemetry_t));
+        if (mem_mng_write_data_to_flash_page(
+                page_buf,
+                &sat_data_buf.obdh.data.media.last_page_cimatelite_data,
+                nor_info.page_size, CONFIG_MEM_CIMATELITE_DATA_START_PAGE,
+                CONFIG_MEM_CIMATELITE_DATA_END_PAGE) == 0)
         {
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Writing to Cimatelite X sector, flash page number: ");
-            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_cimatelite_data);
-            sys_log_new_line();
+            sys_log_print_event_from_module(
+                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                    "Writing to Cimatelite X sector, flash page number: ");
+            sys_log_print_hex(
+                    sat_data_buf.obdh.data.media.last_page_cimatelite_data);
         }
         else
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_DATA_LOG_NAME, "Error writing the Payload-X data to the flash memory!");
+            sys_log_print_event_from_module(
+                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
+                    "Error writing the Payload-X data to the flash memory!");
             sys_log_new_line();
         }
 
-        (void)memset(&page_buf[0], 0, 256);
+        (void) memset(&page_buf[0], 0, 256);
         /* END: Plinio Data */
-
 
         vTaskDelayUntil(&last_cycle, pdMS_TO_TICKS(TASK_DATA_LOG_PERIOD_MS));
     }
