@@ -1761,12 +1761,7 @@ static void process_tc_get_payload_data(uint8_t *pkt, uint16_t pkt_len)
         uint8_t tc_key[16] = CONFIG_TC_KEY_GET_PAYLOAD_DATA; // cppcheck-suppress misra-c2012-7.4
 
         //TODO: ALTERAR PARAMETROS DO HMAC
-//        if (process_tc_validate_hmac(
-//                pkt, 1U + 7U + 1U + 12U, &pkt[21], 20U, tc_key,
-//                sizeof(CONFIG_TC_KEY_GET_PAYLOAD_DATA) - 1U))
-//        {
-
-        if (process_tc_validate_hmac(
+       if (process_tc_validate_hmac(
                      pkt, 1U + 7U, &pkt[8], 20U, tc_key,
                      sizeof(CONFIG_TC_KEY_GET_PAYLOAD_DATA) - 1U))
              {
@@ -1782,7 +1777,7 @@ static void process_tc_get_payload_data(uint8_t *pkt, uint16_t pkt_len)
             sat_data_buf.obdh.data.ts_last_contact = system_get_time();
 
             media_read(MEDIA_NOR,
-                       sat_data_buf.obdh.data.media.last_page_obdh_data - 1,
+                       (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1) * PAGE_SIZE,
                        raw_pkt, size_cimatelite);
             fsat_pkt_add_id(&pkt_broadcast, PKT_ID_DOWNLINK_PAYLOAD_DATA);
             (void) fsat_pkt_add_callsign(&pkt_broadcast,
