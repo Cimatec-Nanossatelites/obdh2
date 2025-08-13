@@ -77,70 +77,49 @@ void vTaskDataLog(void *p)
         taskEXIT_CRITICAL();
 
         /* OBDH data */
-//        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.obdh,
-//                      sizeof(obdh_telemetry_t));
-//        if (mem_mng_write_data_to_flash_page(
-//                page_buf, &sat_data_buf.obdh.data.media.last_page_obdh_data,
-//                nor_info.page_size, CONFIG_MEM_OBDH_DATA_START_PAGE,
-//                CONFIG_MEM_OBDH_DATA_END_PAGE) == 0)
-//        {
-//            sys_log_print_event_from_module(
-//                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-//                    "Writing to OBDH sector, flash page number: ");
-//            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_obdh_data);
-//            sys_log_new_line();
-//
-//            uint8_t saved_pkt[230] = { 0 };
-//            obdh_telemetry_t obdh_tele = { 0 };
-//
-//            media_read(
-//                    MEDIA_NOR,
-//                    (sat_data_buf.obdh.data.media.last_page_obdh_data - 1)
-//                            * PAGE_SIZE,
-//                    saved_pkt, sizeof(obdh_telemetry_t));
-//
-//            memcpy(&obdh_tele, saved_pkt, sizeof(obdh_telemetry_t));
-//
-//            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-//                                            "OBDH saved timestamp: ");
-//            sys_log_print_uint(obdh_tele.timestamp);
-//            sys_log_new_line();
-//            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-//                                            "OBDH Last Page Cimatelite Data: ");
-//            sys_log_print_uint(obdh_tele.data.media.last_page_cimatelite_data);
-//            sys_log_new_line();
-//        }
-//        else
-//        {
-//            sys_log_print_event_from_module(
-//                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
-//                    "Error writing the OBDH data to the flash memory!");
-//            sys_log_new_line();
-//        }
-
-        (void) memset(&page_buf[0], 0, 256);
-
-        /* EPS data */
-        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.eps,
-                      sizeof(eps_telemetry_t));
+        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.obdh,
+                      sizeof(obdh_telemetry_t));
         if (mem_mng_write_data_to_flash_page(
-                page_buf, &sat_data_buf.obdh.data.media.last_page_eps_data,
-                nor_info.page_size, CONFIG_MEM_EPS_DATA_START_PAGE,
-                CONFIG_MEM_EPS_DATA_END_PAGE) == 0)
+                page_buf, &sat_data_buf.obdh.data.media.last_page_obdh_data,
+                nor_info.page_size, CONFIG_MEM_OBDH_DATA_START_PAGE,
+                CONFIG_MEM_OBDH_DATA_END_PAGE) == 0)
         {
             sys_log_print_event_from_module(
                     SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-                    "Writing to EPS sector, flash page number: ");
-            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_eps_data);
+                    "Writing to OBDH sector, flash page number: ");
+            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_obdh_data);
             sys_log_new_line();
         }
         else
         {
             sys_log_print_event_from_module(
                     SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
-                    "Error writing the EPS data to the flash memory!");
+                    "Error writing the OBDH data to the flash memory!");
             sys_log_new_line();
         }
+        (void) memset(&page_buf[0], 0, 256);
+
+        /* EPS data */
+//        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.eps,
+//                      sizeof(eps_telemetry_t));
+//        if (mem_mng_write_data_to_flash_page(
+//                page_buf, &sat_data_buf.obdh.data.media.last_page_eps_data,
+//                nor_info.page_size, CONFIG_MEM_EPS_DATA_START_PAGE,
+//                CONFIG_MEM_EPS_DATA_END_PAGE) == 0)
+//        {
+//            sys_log_print_event_from_module(
+//                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+//                    "Writing to EPS sector, flash page number: ");
+//            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_eps_data);
+//            sys_log_new_line();
+//        }
+//        else
+//        {
+//            sys_log_print_event_from_module(
+//                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
+//                    "Error writing the EPS data to the flash memory!");
+//            sys_log_new_line();
+//        }
 
         (void) memset(&page_buf[0], 0, 256);
 
@@ -242,53 +221,53 @@ void vTaskDataLog(void *p)
 
         (void) memset(&page_buf[0], 0, 256);
 
-        /* Payload-X data */
-//        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.payload_x,
-//                      sizeof(payload_telemetry_t));
-//        if (mem_mng_write_data_to_flash_page(
-//                page_buf, &sat_data_buf.obdh.data.media.last_page_px_data,
-//                nor_info.page_size, CONFIG_MEM_PX_DATA_START_PAGE,
-//                CONFIG_MEM_PX_DATA_END_PAGE) == 0)
-//        {
-//            sys_log_print_event_from_module(
-//                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-//                    "Writing to Payload X sector, flash page number: ");
-//            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_px_data);
-//            sys_log_new_line();
-//        }
-//        else
-//        {
-//            sys_log_print_event_from_module(
-//                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
-//                    "Error writing the Payload-X data to the flash memory!");
-//            sys_log_new_line();
-//        }
-//        (void) memset(&page_buf[0], 0, 256);
         /* Plinio Data */
         (void) memcpy(&page_buf[0], &sat_data_buf.cimatelite,
                       sizeof(cimatelite_telemetry_t));
         if (mem_mng_write_data_to_flash_page(
-                page_buf,
-                &sat_data_buf.obdh.data.media.last_page_obdh_data,
-                nor_info.page_size, CONFIG_MEM_OBDH_DATA_START_PAGE,
-                CONFIG_MEM_OBDH_DATA_END_PAGE) == 0)
+                page_buf, &sat_data_buf.obdh.data.media.last_page_cimatelite_data,
+                nor_info.page_size, CONFIG_MEM_CIMATELITE_DATA_START_PAGE,
+                CONFIG_MEM_CIMATELITE_DATA_END_PAGE) == 0)
         {
             sys_log_print_event_from_module(
                     SYS_LOG_INFO, TASK_DATA_LOG_NAME,
                     "Writing to Cimatelite X sector, flash page number: ");
-            sys_log_print_hex(
-                    sat_data_buf.obdh.data.media.last_page_obdh_data);
+            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_cimatelite_data);
             sys_log_new_line();
 
             uint8_t raw_pkt[256];
             cimatelite_telemetry_t cimatelite;
 
-            media_read(MEDIA_NOR, (sat_data_buf.obdh.data.media.last_page_obdh_data - 1)* PAGE_SIZE,raw_pkt, 256);
+            media_read(
+                    MEDIA_NOR,
+                    (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1)
+                            * PAGE_SIZE,
+                    raw_pkt, 256);
             memcpy(&cimatelite, raw_pkt, sizeof(cimatelite_telemetry_t));
 
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
                                             "Cimatelite Read ID: ");
             sys_log_print_uint(cimatelite.data.ID);
+            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                                            "Cimatelite Read humidity: ");
+            sys_log_print_uint(cimatelite.data.humidity);
+            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                                            "Cimatelite Read precipitation: ");
+            sys_log_print_uint(cimatelite.data.precipitation);
+            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                                            "Cimatelite Read temperature: ");
+            sys_log_print_uint(cimatelite.data.temperature);
+            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                                            "Cimatelite Read wind direction: ");
+            sys_log_print_uint(cimatelite.data.wind_direction);
+            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                                            "Cimatelite Read wind speed: ");
+            sys_log_print_uint(cimatelite.data.wind_speed);
             sys_log_new_line();
         }
         else

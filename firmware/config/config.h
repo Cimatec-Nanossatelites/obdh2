@@ -104,8 +104,10 @@
 #define CONFIG_MEM_INIT_WORD                            {228, 80, 142, 227, 77, 121, 176, 244}
 #define CONFIG_MEM_OBDH_DATA_START_PAGE                 0U
 #define CONFIG_MEM_OBDH_DATA_END_PAGE                   56999U
-#define CONFIG_MEM_EPS_DATA_START_PAGE                  57000U
-#define CONFIG_MEM_EPS_DATA_END_PAGE                    113999U
+#define CONFIG_MEM_EPS_DATA_START_PAGE                  342000U
+#define CONFIG_MEM_EPS_DATA_END_PAGE                    398999U
+#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE                  57000U
+#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE                    113999U
 #define CONFIG_MEM_TTC_0_DATA_START_PAGE                114000U
 #define CONFIG_MEM_TTC_0_DATA_END_PAGE                  170999U
 #define CONFIG_MEM_TTC_1_DATA_START_PAGE                171000U
@@ -114,8 +116,8 @@
 #define CONFIG_MEM_ANT_DATA_END_PAGE                    284999U
 #define CONFIG_MEM_EDC_DATA_START_PAGE                  285000U
 #define CONFIG_MEM_EDC_DATA_END_PAGE                    341999U
-#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE                   342000U
-#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE                     398999U
+//#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE                   342000U
+//#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE                     398999U
 #define CONFIG_MEM_SBCD_PKTS_START_PAGE                 399000U
 #define CONFIG_MEM_SBCD_PKTS_END_PAGE                   499999U
 #define CONFIG_MEM_ADR_SYS_TIME_BAK                     0x1980U
