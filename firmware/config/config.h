@@ -104,31 +104,25 @@
 #define CONFIG_MEM_INIT_WORD                            {228, 80, 142, 227, 77, 121, 176, 244}
 #define CONFIG_MEM_OBDH_DATA_START_PAGE                 0U
 #define CONFIG_MEM_OBDH_DATA_END_PAGE                   56999U
-#define CONFIG_MEM_EPS_DATA_START_PAGE                  342000U
-#define CONFIG_MEM_EPS_DATA_END_PAGE                    398999U
-#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE                  57000U
-#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE                    113999U
+#define CONFIG_MEM_EPS_DATA_START_PAGE                  57000U OK
+#define CONFIG_MEM_EPS_DATA_END_PAGE                    113999U
 #define CONFIG_MEM_TTC_0_DATA_START_PAGE                114000U
 #define CONFIG_MEM_TTC_0_DATA_END_PAGE                  170999U
 #define CONFIG_MEM_TTC_1_DATA_START_PAGE                171000U
 #define CONFIG_MEM_TTC_1_DATA_END_PAGE                  227999U
 #define CONFIG_MEM_ANT_DATA_START_PAGE                  228000U
 #define CONFIG_MEM_ANT_DATA_END_PAGE                    284999U
-#define CONFIG_MEM_EDC_DATA_START_PAGE                  285000U
-#define CONFIG_MEM_EDC_DATA_END_PAGE                    341999U
-//#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE                   342000U
-//#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE                     398999U
+#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE           285000U
+#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE             341999U
+#define CONFIG_MEM_EDC_DATA_START_PAGE                  500000U
+#define CONFIG_MEM_EDC_DATA_END_PAGE                    510000U
 #define CONFIG_MEM_SBCD_PKTS_START_PAGE                 399000U
 #define CONFIG_MEM_SBCD_PKTS_END_PAGE                   499999U
 #define CONFIG_MEM_ADR_SYS_TIME_BAK                     0x1980U
 #define CONFIG_MEM_ADR_SYS_PARAM_BAK                    0x1900U
 
-//#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE                  500000U
-//#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE                    510000U
-
 #define PAYLOAD_MAX_TRANSMIT 3
 #define PAGE_SIZE           ((uint32_t)256UL)
-
 
 /* Health Check Config Parameters */
 #if defined(CONFIG_HEALTH_CHECK_ENABLED) && (CONFIG_HEALTH_CHECK_ENABLED == 1)
