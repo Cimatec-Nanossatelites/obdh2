@@ -1761,34 +1761,35 @@ static void process_tc_get_payload_data(uint8_t *pkt, uint16_t pkt_len)
         uint8_t tc_key[16] = CONFIG_TC_KEY_GET_PAYLOAD_DATA; // cppcheck-suppress misra-c2012-7.4
 
         //TODO: ALTERAR PARAMETROS DO HMAC
-       if (process_tc_validate_hmac(
-                     pkt, 1U + 7U, &pkt[8], 20U, tc_key,
-                     sizeof(CONFIG_TC_KEY_GET_PAYLOAD_DATA) - 1U))
-             {
+        if (process_tc_validate_hmac(
+                pkt, 1U + 7U, &pkt[8], 20U, tc_key,
+                sizeof(CONFIG_TC_KEY_GET_PAYLOAD_DATA) - 1U))
+        {
 
             fsat_pkt_pl_t pkt_broadcast;
-//            const uint8_t size_cimatelite = sizeof(PCD_data_T);
             const uint8_t size_cimatelite = sizeof(cimatelite_telemetry_t);
-            uint8_t raw_pkt[size_cimatelite];
+            uint8_t cimatelite_data[256];
+            uint8_t raw_pkt[220];
             uint16_t raw_pkt_len;
 
             /* Update last valid tc parameter */
             sat_data_buf.obdh.data.last_valid_tc = pkt[0];
             sat_data_buf.obdh.data.ts_last_contact = system_get_time();
 
-            media_read(MEDIA_NOR,
-                       (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1) * PAGE_SIZE,
-                       raw_pkt, size_cimatelite);
+            media_read(
+                    MEDIA_NOR,
+                    (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1)
+                            * PAGE_SIZE,
+                            cimatelite_data, 256);
             fsat_pkt_add_id(&pkt_broadcast, PKT_ID_DOWNLINK_PAYLOAD_DATA);
             (void) fsat_pkt_add_callsign(&pkt_broadcast,
             CONFIG_SATELLITE_CALLSIGN);
 
-            (void) memcpy(pkt_broadcast.payload, raw_pkt, size_cimatelite);
+            (void) memcpy(pkt_broadcast.payload, cimatelite_data, size_cimatelite);
             pkt_broadcast.length = size_cimatelite;
 
-            PCD_data_T payload = { 0 };
-            memcpy(&payload, (PCD_data_T*) &pkt_broadcast.payload,
-                   sizeof(PCD_data_T));
+            cimatelite_telemetry_t payload = { 0 };
+            memcpy(&payload, &pkt_broadcast.payload, size_cimatelite);
 
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                             "Payload Data Successfully read");
@@ -1796,32 +1797,32 @@ static void process_tc_get_payload_data(uint8_t *pkt, uint16_t pkt_len)
 
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                             "ID: ");
-            sys_log_print_uint(payload.ID);
+            sys_log_print_uint(payload.data.ID);
             sys_log_new_line();
 
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                             "Humidity: ");
-            sys_log_print_uint(payload.humidity);
+            sys_log_print_uint(payload.data.humidity);
             sys_log_new_line();
 
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                             "Precipitation: ");
-            sys_log_print_float(payload.precipitation, 2);
+            sys_log_print_uint(payload.data.precipitation);
             sys_log_new_line();
 
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                             "Temperature: ");
-            sys_log_print_uint(payload.temperature);
+            sys_log_print_uint(payload.data.temperature);
             sys_log_new_line();
 
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                             "Wind Direction: ");
-            sys_log_print_byte(payload.wind_direction);
+            sys_log_print_byte(payload.data.wind_direction);
             sys_log_new_line();
 
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                             "Wind Speed: ");
-            sys_log_print_float(payload.wind_speed, 2);
+            sys_log_print_uint(payload.data.wind_speed);
             sys_log_new_line();
 
             fsat_pkt_encode(&pkt_broadcast, raw_pkt, &raw_pkt_len);
