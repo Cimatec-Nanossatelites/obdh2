@@ -120,7 +120,6 @@ void vTaskDataLog(void *p)
 //                    "Error writing the EPS data to the flash memory!");
 //            sys_log_new_line();
 //        }
-
         (void) memset(&page_buf[0], 0, 256);
 
         /* TTC 0 data */
@@ -221,64 +220,97 @@ void vTaskDataLog(void *p)
 
         (void) memset(&page_buf[0], 0, 256);
 
-        /* Plinio Data */
+        /* Cimatelite Data */
         (void) memcpy(&page_buf[0], &sat_data_buf.cimatelite,
                       sizeof(cimatelite_telemetry_t));
-        if (mem_mng_write_data_to_flash_page(
-                page_buf, &sat_data_buf.obdh.data.media.last_page_cimatelite_data,
-                nor_info.page_size, CONFIG_MEM_CIMATELITE_DATA_START_PAGE,
-                CONFIG_MEM_CIMATELITE_DATA_END_PAGE) == 0)
+        uint8_t raw_pkt[256];
+        cimatelite_telemetry_t cimatelite;
+        media_read(
+                MEDIA_NOR,
+                (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1)
+                        * PAGE_SIZE,
+                raw_pkt, 256);
+
+        memcpy(&cimatelite, raw_pkt, sizeof(cimatelite_telemetry_t));
+
+        if (sat_data_buf.obdh.data.media.last_page_cimatelite_data
+                - CONFIG_MEM_CIMATELITE_DATA_START_PAGE > 0)
         {
-            sys_log_print_event_from_module(
-                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-                    "Writing to Cimatelite X sector, flash page number: ");
-            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_cimatelite_data);
-            sys_log_new_line();
+            if (sat_data_buf.cimatelite.data.ID != cimatelite.data.ID)
+            {
+                if (mem_mng_write_data_to_flash_page(
+                        page_buf,
+                        &sat_data_buf.obdh.data.media.last_page_cimatelite_data,
+                        nor_info.page_size,
+                        CONFIG_MEM_CIMATELITE_DATA_START_PAGE,
+                        CONFIG_MEM_CIMATELITE_DATA_END_PAGE) == 0)
+                {
+                    sys_log_print_event_from_module(
+                            SYS_LOG_INFO,
+                            TASK_DATA_LOG_NAME,
+                            "Writing to Cimatelite X sector, flash page number: ");
+                    sys_log_print_hex(
+                            sat_data_buf.obdh.data.media.last_page_cimatelite_data);
+                    sys_log_new_line();
 
-            uint8_t raw_pkt[256];
-            cimatelite_telemetry_t cimatelite;
+                    media_read(
+                            MEDIA_NOR,
+                            (sat_data_buf.obdh.data.media.last_page_cimatelite_data
+                                    - 1) * PAGE_SIZE,
+                            raw_pkt, 256);
+                    memcpy(&cimatelite, raw_pkt,
+                           sizeof(cimatelite_telemetry_t));
 
-            media_read(
-                    MEDIA_NOR,
-                    (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1)
-                            * PAGE_SIZE,
-                    raw_pkt, 256);
-            memcpy(&cimatelite, raw_pkt, sizeof(cimatelite_telemetry_t));
-
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-                                            "Cimatelite Read ID: ");
-            sys_log_print_uint(cimatelite.data.ID);
-            sys_log_new_line();
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-                                            "Cimatelite Read humidity: ");
-            sys_log_print_uint(cimatelite.data.humidity);
-            sys_log_new_line();
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-                                            "Cimatelite Read precipitation: ");
-            sys_log_print_uint(cimatelite.data.precipitation);
-            sys_log_new_line();
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-                                            "Cimatelite Read temperature: ");
-            sys_log_print_uint(cimatelite.data.temperature);
-            sys_log_new_line();
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-                                            "Cimatelite Read wind direction: ");
-            sys_log_print_uint(cimatelite.data.wind_direction);
-            sys_log_new_line();
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-                                            "Cimatelite Read wind speed: ");
-            sys_log_print_uint(cimatelite.data.wind_speed);
-            sys_log_new_line();
+                    sys_log_print_event_from_module(SYS_LOG_INFO,
+                    TASK_DATA_LOG_NAME,
+                                                    "Cimatelite Read ID: ");
+                    sys_log_print_uint(cimatelite.data.ID);
+                    sys_log_new_line();
+                }
+                else
+                {
+                    sys_log_print_event_from_module(
+                            SYS_LOG_ERROR,
+                            TASK_DATA_LOG_NAME,
+                            "Error writing the Cimatelite data to the flash memory!");
+                    sys_log_new_line();
+                }
+            }
         }
         else
         {
-            sys_log_print_event_from_module(
-                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
-                    "Error writing the Payload-X data to the flash memory!");
-            sys_log_new_line();
+            if (mem_mng_write_data_to_flash_page(
+                    page_buf,
+                    &sat_data_buf.obdh.data.media.last_page_cimatelite_data,
+                    nor_info.page_size,
+                    CONFIG_MEM_CIMATELITE_DATA_START_PAGE,
+                    CONFIG_MEM_CIMATELITE_DATA_END_PAGE) == 0)
+            {
+                sys_log_print_event_from_module(
+                        SYS_LOG_INFO,
+                        TASK_DATA_LOG_NAME,
+                        "Writing to Cimatelite X sector, flash page number: ");
+                sys_log_print_hex(
+                        sat_data_buf.obdh.data.media.last_page_cimatelite_data);
+                sys_log_new_line();
+
+                media_read(
+                        MEDIA_NOR,
+                        (sat_data_buf.obdh.data.media.last_page_cimatelite_data
+                                - 1) * PAGE_SIZE,
+                        raw_pkt, 256);
+                memcpy(&cimatelite, raw_pkt, sizeof(cimatelite_telemetry_t));
+
+                sys_log_print_event_from_module(SYS_LOG_INFO,
+                TASK_DATA_LOG_NAME,
+                                                "Cimatelite Read ID: ");
+                sys_log_print_uint(cimatelite.data.ID);
+                sys_log_new_line();
+            }
+
+            (void) memset(&page_buf[0], 0, 256);
         }
 
-        (void) memset(&page_buf[0], 0, 256);
         /* END: Plinio Data */
 
         vTaskDelayUntil(&last_cycle, pdMS_TO_TICKS(TASK_DATA_LOG_PERIOD_MS));
