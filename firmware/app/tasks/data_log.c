@@ -236,7 +236,7 @@ void vTaskDataLog(void *p)
         if (sat_data_buf.obdh.data.media.last_page_cimatelite_data
                 - CONFIG_MEM_CIMATELITE_DATA_START_PAGE > 0)
         {
-            if (sat_data_buf.cimatelite.data.ID != cimatelite.data.ID)
+            if (sat_data_buf.cimatelite.data.ID != cimatelite.data.ID && sat_data_buf.cimatelite.data.ID != 0)
             {
                 if (mem_mng_write_data_to_flash_page(
                         page_buf,
