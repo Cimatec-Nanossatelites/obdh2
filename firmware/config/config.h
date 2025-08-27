@@ -46,7 +46,7 @@
 #define CONFIG_TASK_HEARTBEAT_ENABLED                   1
 #define CONFIG_TASK_SYSTEM_RESET_ENABLED                1
 #define CONFIG_TASK_READ_SENSORS_ENABLED                0
-#define CONFIG_TASK_GENERAL_TELEMETRY_ENABLED           0
+#define CONFIG_TASK_GENERAL_TELEMETRY_ENABLED           1
 #define CONFIG_TASK_TIME_CONTROL_ENABLED                1
 #define CONFIG_TASK_READ_EDC_ENABLED                    0
 #define CONFIG_TASK_READ_EPS_ENABLED                    0
@@ -67,9 +67,9 @@
 #define CONFIG_DEV_MEDIA_FRAM_ENABLED                   1
 #define CONFIG_DEV_MEDIA_NOR_ENABLED                    1
 #define CONFIG_DEV_LEDS_ENABLED                         1
-#define CONFIG_DEV_CURRENT_SENSOR_ENABLED               0
-#define CONFIG_DEV_VOLTAGE_SENSOR_ENABLED               0
-#define CONFIG_DEV_TEMP_SENSOR_ENABLED                  0
+#define CONFIG_DEV_CURRENT_SENSOR_ENABLED               1
+#define CONFIG_DEV_VOLTAGE_SENSOR_ENABLED               1
+#define CONFIG_DEV_TEMP_SENSOR_ENABLED                  1
 #define CONFIG_DEV_EPS_ENABLED                          0
 #define CONFIG_DEV_PAYLOAD_EDC_ENABLED                  0
 #define CONFIG_DEV_ANTENNA_ENABLED                      0
