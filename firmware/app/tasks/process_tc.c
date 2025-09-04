@@ -1796,34 +1796,74 @@ static void process_tc_get_payload_data(uint8_t *pkt, uint16_t pkt_len)
             sys_log_new_line();
 
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                            "ID: ");
-            sys_log_print_uint(payload.data.ID);
-            sys_log_new_line();
+                                                 "ID: ");
+                 sys_log_print_uint(payload.data.pkt_id);
+                 sys_log_new_line();
 
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                            "Humidity: ");
-            sys_log_print_uint(payload.data.humidity);
-            sys_log_new_line();
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Day: ");
+                 sys_log_print_uint(payload.data.day);
+                 sys_log_new_line();
 
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                            "Precipitation: ");
-            sys_log_print_uint(payload.data.precipitation);
-            sys_log_new_line();
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Month: ");
+                 sys_log_print_uint(payload.data.month);
+                 sys_log_new_line();
 
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                            "Temperature: ");
-            sys_log_print_uint(payload.data.temperature);
-            sys_log_new_line();
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Year: ");
+                 sys_log_print_uint(payload.data.year);
+                 sys_log_new_line();
 
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                            "Wind Direction: ");
-            sys_log_print_byte(payload.data.wind_direction);
-            sys_log_new_line();
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Hours: ");
+                 sys_log_print_uint(payload.data.hours);
+                 sys_log_new_line();
 
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                            "Wind Speed: ");
-            sys_log_print_uint(payload.data.wind_speed);
-            sys_log_new_line();
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Minutes: ");
+                 sys_log_print_uint(payload.data.minutes);
+                 sys_log_new_line();
+
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Wind Speed: ");
+                 sys_log_print_uint(payload.data.wind_speed);
+                 sys_log_new_line();
+
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Battery: ");
+                 sys_log_print_uint(payload.data.battery);
+                 sys_log_new_line();
+
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Wind Direction: ");
+                 sys_log_print_byte(payload.data.wind_direction);
+                 sys_log_new_line();
+
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Rainfall: ");
+                 sys_log_print_uint(payload.data.rainfall);
+                 sys_log_new_line();
+
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Ground Humidity: ");
+                 sys_log_print_uint(payload.data.ground_humidity);
+                 sys_log_new_line();
+
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Humidity: ");
+                 sys_log_print_uint(payload.data.humidity);
+                 sys_log_new_line();
+
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "Temperature: ");
+                 sys_log_print_int(payload.data.temperature);
+                 sys_log_new_line();
+
+                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                                 "CO2: ");
+                 sys_log_print_uint(payload.data.co2);
+                 sys_log_new_line();
 
             fsat_pkt_encode(&pkt_broadcast, raw_pkt, &raw_pkt_len);
 
@@ -2370,13 +2410,11 @@ static void process_tc_receive_pcd_payload_packet(uint8_t *pkt,
 {
     uint8_t tc_key[16] = CONFIG_TC_KEY_TRANSMIT_CIMATELTIE_PACKET;
 
-    if (process_tc_validate_hmac(&pkt[1], 20U, &pkt[1], 20U, tc_key, 16U))
+    if (process_tc_validate_hmac(&pkt[35], 20U, &pkt[35], 20U, tc_key, 16U))
     {
         sat_data_buf.cimatelite.timestamp = system_get_time();
 
-        uint16_t payload_length = pkt_len - 21;
-
-        memcpy(&sat_data_buf.cimatelite.data, &pkt[21], sizeof(PCD_data_T));
+        memcpy(&sat_data_buf.cimatelite.data, &pkt[1], sizeof(PCD_data_T));
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                         "Packet successfully received");
@@ -2384,22 +2422,42 @@ static void process_tc_receive_pcd_payload_packet(uint8_t *pkt,
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                         "ID: ");
-        sys_log_print_uint(sat_data_buf.cimatelite.data.ID);
+        sys_log_print_uint(sat_data_buf.cimatelite.data.pkt_id);
         sys_log_new_line();
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                        "Humidity: ");
-        sys_log_print_uint(sat_data_buf.cimatelite.data.humidity);
+                                        "Day: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.day);
         sys_log_new_line();
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                        "Precipitation: ");
-        sys_log_print_float(sat_data_buf.cimatelite.data.precipitation, 2);
+                                        "Month: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.month);
         sys_log_new_line();
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                        "Temperature: ");
-        sys_log_print_uint(sat_data_buf.cimatelite.data.temperature);
+                                        "Year: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.year);
+        sys_log_new_line();
+
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                        "Hours: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.hours);
+        sys_log_new_line();
+
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                        "Minutes: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.minutes);
+        sys_log_new_line();
+
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                        "Wind Speed: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.wind_speed);
+        sys_log_new_line();
+
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                        "Battery: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.battery);
         sys_log_new_line();
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
@@ -2408,9 +2466,30 @@ static void process_tc_receive_pcd_payload_packet(uint8_t *pkt,
         sys_log_new_line();
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                        "Wind Speed: ");
-        sys_log_print_float(sat_data_buf.cimatelite.data.wind_speed, 2);
+                                        "Rainfall: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.rainfall);
         sys_log_new_line();
+
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                        "Ground Humidity: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.ground_humidity);
+        sys_log_new_line();
+
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                        "Humidity: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.humidity);
+        sys_log_new_line();
+
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                        "Temperature: ");
+        sys_log_print_int(sat_data_buf.cimatelite.data.temperature);
+        sys_log_new_line();
+
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                        "CO2: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.co2);
+        sys_log_new_line();
+
     }
 }
 

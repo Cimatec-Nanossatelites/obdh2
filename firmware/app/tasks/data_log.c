@@ -100,26 +100,26 @@ void vTaskDataLog(void *p)
         (void) memset(&page_buf[0], 0, 256);
 
         /* EPS data */
-//        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.eps,
-//                      sizeof(eps_telemetry_t));
-//        if (mem_mng_write_data_to_flash_page(
-//                page_buf, &sat_data_buf.obdh.data.media.last_page_eps_data,
-//                nor_info.page_size, CONFIG_MEM_EPS_DATA_START_PAGE,
-//                CONFIG_MEM_EPS_DATA_END_PAGE) == 0)
-//        {
-//            sys_log_print_event_from_module(
-//                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-//                    "Writing to EPS sector, flash page number: ");
-//            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_eps_data);
-//            sys_log_new_line();
-//        }
-//        else
-//        {
-//            sys_log_print_event_from_module(
-//                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
-//                    "Error writing the EPS data to the flash memory!");
-//            sys_log_new_line();
-//        }
+        (void) memcpy(&page_buf[0], (void*) &sat_data_buf.eps,
+                      sizeof(eps_telemetry_t));
+        if (mem_mng_write_data_to_flash_page(
+                page_buf, &sat_data_buf.obdh.data.media.last_page_eps_data,
+                nor_info.page_size, CONFIG_MEM_EPS_DATA_START_PAGE,
+                CONFIG_MEM_EPS_DATA_END_PAGE) == 0)
+        {
+            sys_log_print_event_from_module(
+                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
+                    "Writing to EPS sector, flash page number: ");
+            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_eps_data);
+            sys_log_new_line();
+        }
+        else
+        {
+            sys_log_print_event_from_module(
+                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
+                    "Error writing the EPS data to the flash memory!");
+            sys_log_new_line();
+        }
         (void) memset(&page_buf[0], 0, 256);
 
         /* TTC 0 data */
@@ -236,7 +236,7 @@ void vTaskDataLog(void *p)
         if (sat_data_buf.obdh.data.media.last_page_cimatelite_data
                 - CONFIG_MEM_CIMATELITE_DATA_START_PAGE > 0)
         {
-            if (sat_data_buf.cimatelite.data.ID != cimatelite.data.ID && sat_data_buf.cimatelite.data.ID != 0)
+            if (sat_data_buf.cimatelite.data.pkt_id != cimatelite.data.pkt_id && sat_data_buf.cimatelite.data.pkt_id != 0)
             {
                 if (mem_mng_write_data_to_flash_page(
                         page_buf,
@@ -264,7 +264,7 @@ void vTaskDataLog(void *p)
                     sys_log_print_event_from_module(SYS_LOG_INFO,
                     TASK_DATA_LOG_NAME,
                                                     "Cimatelite Read ID: ");
-                    sys_log_print_uint(cimatelite.data.ID);
+                    sys_log_print_uint(cimatelite.data.pkt_id);
                     sys_log_new_line();
                 }
                 else
@@ -304,7 +304,7 @@ void vTaskDataLog(void *p)
                 sys_log_print_event_from_module(SYS_LOG_INFO,
                 TASK_DATA_LOG_NAME,
                                                 "Cimatelite Read ID: ");
-                sys_log_print_uint(cimatelite.data.ID);
+                sys_log_print_uint(cimatelite.data.pkt_id);
                 sys_log_new_line();
             }
 

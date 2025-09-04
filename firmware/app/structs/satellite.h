@@ -189,12 +189,20 @@ typedef struct
 
 typedef struct
 {
-    uint8_t ID;
-    uint8_t humidity;
-    uint8_t precipitation;
-    uint8_t temperature;
-    uint8_t wind_direction;
-    uint8_t wind_speed;
+    uint32_t pkt_id;
+    uint16_t day;
+    uint16_t month;
+    uint16_t year;
+    uint16_t hours;
+    uint16_t minutes;
+    uint16_t battery;
+    uint32_t wind_speed; //todo: Deve ser float
+    uint16_t wind_direction;
+    uint32_t rainfall; //todo: Deve ser float
+    uint16_t ground_humidity;
+    uint16_t humidity;
+    int16_t temperature;
+    uint16_t co2;
 } PCD_data_T;
 
 /**
