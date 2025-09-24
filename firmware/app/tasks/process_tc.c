@@ -669,7 +669,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len)
                             if (sat_data_buf.obdh.data.mode
                                     != OBDH_MODE_HIBERNATION)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw,
+                                if (ttc_send(TTC_1, data_req_ans_raw,
                                              data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(
@@ -2462,7 +2462,7 @@ static void process_tc_receive_pcd_payload_packet(uint8_t *pkt,
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                         "Wind Direction: ");
-        sys_log_print_byte(sat_data_buf.cimatelite.data.wind_direction);
+        sys_log_print_uint(sat_data_buf.cimatelite.data.wind_direction);
         sys_log_new_line();
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
