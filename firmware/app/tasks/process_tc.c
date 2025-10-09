@@ -1787,11 +1787,11 @@ static void process_tc_get_payload_data(uint8_t *pkt, uint16_t pkt_len)
                             * PAGE_SIZE,
                     cimatelite_data, 256);
 
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                            "Pagina lida na memoria: ");
-            sys_log_print_uint(
-                    (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1));
-            sys_log_new_line();
+//            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+//                                            "Pagina lida na memoria: ");
+//            sys_log_print_uint(
+//                    (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1));
+//            sys_log_new_line();
 
             fsat_pkt_add_id(&pkt_broadcast, PKT_ID_DOWNLINK_PAYLOAD_DATA);
             (void) fsat_pkt_add_callsign(&pkt_broadcast,
@@ -1862,11 +1862,11 @@ static void process_tc_get_payload_data(uint8_t *pkt, uint16_t pkt_len)
                                        &pkt_broadcast.length, DATA_ID_PAYLOAD_CIMATELITE,
                                        cimatelite_data);
 
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                            "Pacote sem NgHam: ");
-            sys_log_new_line();
-            sys_log_dump_hex((uint8_t*) &pkt_broadcast,
-                             sizeof(pkt_broadcast) - 2);
+//            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+//                                            "Pacote sem NgHam: ");
+//            sys_log_new_line();
+//            sys_log_dump_hex((uint8_t*) &pkt_broadcast,
+//                             sizeof(pkt_broadcast) - 2);
 
             fsat_pkt_encode(&pkt_broadcast, raw_pkt, &raw_pkt_len);
 
