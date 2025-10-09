@@ -44,7 +44,7 @@
 #define TASK_GENERAL_TELEMETRY_NAME                    "General Telemetry" /**< Task name. */
 #define TASK_GENERAL_TELEMETRY_STACK_SIZE              250                 /**< Stack size in bytes. */
 #define TASK_GENERAL_TELEMETRY_PRIORITY                4                   /**< Task priority. */
-#define TASK_GENERAL_TELEMETRY_PERIOD_MS               60000               /**< Task period in milliseconds. */
+#define TASK_GENERAL_TELEMETRY_PERIOD_MS               30000               /**< Task period in milliseconds. */
 #define TASK_GENERAL_TELEMETRY_INITIAL_DELAY_MS        20000               /**< Delay, in milliseconds, before the first execution. */
 #define TASK_GENERAL_TELEMETRY_INIT_TIMEOUT_MS         10000               /**< Wait time to initialize the task in milliseconds. */
 
