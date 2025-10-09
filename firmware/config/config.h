@@ -45,11 +45,11 @@
 #define CONFIG_TASK_WATCHDOG_RESET_ENABLED              1
 #define CONFIG_TASK_HEARTBEAT_ENABLED                   1
 #define CONFIG_TASK_SYSTEM_RESET_ENABLED                1
-#define CONFIG_TASK_READ_SENSORS_ENABLED                0
+#define CONFIG_TASK_READ_SENSORS_ENABLED                1
 #define CONFIG_TASK_GENERAL_TELEMETRY_ENABLED           1
 #define CONFIG_TASK_TIME_CONTROL_ENABLED                1
 #define CONFIG_TASK_READ_EDC_ENABLED                    0
-#define CONFIG_TASK_READ_EPS_ENABLED                    0
+#define CONFIG_TASK_READ_EPS_ENABLED                    1
 #define CONFIG_TASK_READ_TTC_ENABLED                    1
 #define CONFIG_TASK_READ_ANTENNA_ENABLED                0
 #define CONFIG_TASK_DATA_LOG_ENABLED                    1

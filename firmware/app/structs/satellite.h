@@ -126,6 +126,7 @@ typedef enum {
     DATA_ID_ANT                        = 4,
     DATA_ID_SBCD_PKTS                  = 5,
     DATA_ID_PAYLOAD_INFO               = 6,
+    DATA_ID_PAYLOAD_CIMATELITE         = 7,
 } data_id_e;
 
 /**
@@ -190,11 +191,7 @@ typedef struct
 typedef struct
 {
     uint32_t pkt_id;
-    uint16_t day;
-    uint16_t month;
-    uint16_t year;
-    uint16_t hours;
-    uint16_t minutes;
+    uint32_t timestamp;
     uint16_t battery;
     uint32_t wind_speed; //todo: Deve ser float
     uint16_t wind_direction;

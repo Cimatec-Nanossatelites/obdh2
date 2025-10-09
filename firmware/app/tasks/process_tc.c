@@ -619,12 +619,17 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len)
             sat_data_buf.obdh.data.last_valid_tc = pkt[0];
             sat_data_buf.obdh.data.ts_last_contact = system_get_time();
 
-            uint32_t start_idx = ((uint32_t) pkt[9] << 24)
-                    | ((uint32_t) pkt[10] << 16) | ((uint32_t) pkt[11] << 8)
-                    | (uint32_t) pkt[12];
-            uint32_t end_idx = ((uint32_t) pkt[13] << 24)
-                    | ((uint32_t) pkt[14] << 16) | ((uint32_t) pkt[15] << 8)
-                    | (uint32_t) pkt[16];
+//            uint32_t start_idx = ((uint32_t) pkt[9] << 24)
+//                    | ((uint32_t) pkt[10] << 16) | ((uint32_t) pkt[11] << 8)
+//                    | (uint32_t) pkt[12];
+//            uint32_t end_idx = ((uint32_t) pkt[13] << 24)
+//                    | ((uint32_t) pkt[14] << 16) | ((uint32_t) pkt[15] << 8)
+//                    | (uint32_t) pkt[16];
+
+            uint32_t start_idx;
+            uint32_t end_idx;
+            memcpy(&start_idx, &pkt[9], sizeof(uint32_t));
+            memcpy(&end_idx, &pkt[13], sizeof(uint32_t));
 
             media_info_t nor_info = media_get_info(MEDIA_NOR);
 
@@ -1780,12 +1785,20 @@ static void process_tc_get_payload_data(uint8_t *pkt, uint16_t pkt_len)
                     MEDIA_NOR,
                     (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1)
                             * PAGE_SIZE,
-                            cimatelite_data, 256);
+                    cimatelite_data, 256);
+
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                            "Pagina lida na memoria: ");
+            sys_log_print_uint(
+                    (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1));
+            sys_log_new_line();
+
             fsat_pkt_add_id(&pkt_broadcast, PKT_ID_DOWNLINK_PAYLOAD_DATA);
             (void) fsat_pkt_add_callsign(&pkt_broadcast,
             CONFIG_SATELLITE_CALLSIGN);
 
-            (void) memcpy(pkt_broadcast.payload, cimatelite_data, size_cimatelite);
+            (void) memcpy(pkt_broadcast.payload, cimatelite_data,
+                          size_cimatelite);
             pkt_broadcast.length = size_cimatelite;
 
             cimatelite_telemetry_t payload = { 0 };
@@ -1796,74 +1809,64 @@ static void process_tc_get_payload_data(uint8_t *pkt, uint16_t pkt_len)
             sys_log_new_line();
 
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "ID: ");
-                 sys_log_print_uint(payload.data.pkt_id);
-                 sys_log_new_line();
+                                            "ID: ");
+            sys_log_print_uint(payload.data.pkt_id);
+            sys_log_new_line();
 
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Day: ");
-                 sys_log_print_uint(payload.data.day);
-                 sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                            "Timestamp: ");
+            sys_log_print_uint(payload.data.timestamp);
+            sys_log_new_line();
 
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Month: ");
-                 sys_log_print_uint(payload.data.month);
-                 sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                            "Wind Speed: ");
+            sys_log_print_uint(payload.data.wind_speed);
+            sys_log_new_line();
 
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Year: ");
-                 sys_log_print_uint(payload.data.year);
-                 sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                            "Battery: ");
+            sys_log_print_uint(payload.data.battery);
+            sys_log_new_line();
 
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Hours: ");
-                 sys_log_print_uint(payload.data.hours);
-                 sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                            "Wind Direction: ");
+            sys_log_print_uint(payload.data.wind_direction);
+            sys_log_new_line();
 
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Minutes: ");
-                 sys_log_print_uint(payload.data.minutes);
-                 sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                            "Rainfall: ");
+            sys_log_print_uint(payload.data.rainfall);
+            sys_log_new_line();
 
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Wind Speed: ");
-                 sys_log_print_uint(payload.data.wind_speed);
-                 sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                            "Ground Humidity: ");
+            sys_log_print_uint(payload.data.ground_humidity);
+            sys_log_new_line();
 
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Battery: ");
-                 sys_log_print_uint(payload.data.battery);
-                 sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                            "Humidity: ");
+            sys_log_print_uint(payload.data.humidity);
+            sys_log_new_line();
 
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Wind Direction: ");
-                 sys_log_print_byte(payload.data.wind_direction);
-                 sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                            "Temperature: ");
+            sys_log_print_int(payload.data.temperature);
+            sys_log_new_line();
 
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Rainfall: ");
-                 sys_log_print_uint(payload.data.rainfall);
-                 sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                            "CO2: ");
+            sys_log_print_uint(payload.data.co2);
+            sys_log_new_line();
 
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Ground Humidity: ");
-                 sys_log_print_uint(payload.data.ground_humidity);
-                 sys_log_new_line();
+            (void) format_data_request(pkt_broadcast.payload,
+                                       &pkt_broadcast.length, DATA_ID_PAYLOAD_CIMATELITE,
+                                       cimatelite_data);
 
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Humidity: ");
-                 sys_log_print_uint(payload.data.humidity);
-                 sys_log_new_line();
-
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "Temperature: ");
-                 sys_log_print_int(payload.data.temperature);
-                 sys_log_new_line();
-
-                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                                 "CO2: ");
-                 sys_log_print_uint(payload.data.co2);
-                 sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                                            "Pacote sem NgHam: ");
+            sys_log_new_line();
+            sys_log_dump_hex((uint8_t*) &pkt_broadcast,
+                             sizeof(pkt_broadcast) - 2);
 
             fsat_pkt_encode(&pkt_broadcast, raw_pkt, &raw_pkt_len);
 
@@ -2426,28 +2429,8 @@ static void process_tc_receive_pcd_payload_packet(uint8_t *pkt,
         sys_log_new_line();
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                        "Day: ");
-        sys_log_print_uint(sat_data_buf.cimatelite.data.day);
-        sys_log_new_line();
-
-        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                        "Month: ");
-        sys_log_print_uint(sat_data_buf.cimatelite.data.month);
-        sys_log_new_line();
-
-        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                        "Year: ");
-        sys_log_print_uint(sat_data_buf.cimatelite.data.year);
-        sys_log_new_line();
-
-        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                        "Hours: ");
-        sys_log_print_uint(sat_data_buf.cimatelite.data.hours);
-        sys_log_new_line();
-
-        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                        "Minutes: ");
-        sys_log_print_uint(sat_data_buf.cimatelite.data.minutes);
+                                        "Timestamp: ");
+        sys_log_print_uint(sat_data_buf.cimatelite.data.timestamp);
         sys_log_new_line();
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
@@ -2939,6 +2922,67 @@ static int8_t format_data_request(uint8_t *pkt_pl, uint16_t *pkt_pl_len,
 
         break;
     }
+    case DATA_ID_PAYLOAD_CIMATELITE:
+        cimatelite_telemetry_t *tel = (cimatelite_telemetry_t*) data; // cppcheck-suppress misra-c2012-11.5
+        uint8_t *pl = pkt_pl;
+
+        // timestamp (sys_time_t -> assumindo uint32_t)
+        pl[0] = (tel->timestamp >> 24U) & 0xFFU;
+        pl[1] = (tel->timestamp >> 16U) & 0xFFU;
+        pl[2] = (tel->timestamp >> 8U) & 0xFFU;
+        pl[3] = tel->timestamp & 0xFFU;
+
+        // pkt_id
+        pl[4] = (tel->data.pkt_id >> 24U) & 0xFFU;
+        pl[5] = (tel->data.pkt_id >> 16U) & 0xFFU;
+        pl[6] = (tel->data.pkt_id >> 8U) & 0xFFU;
+        pl[7] = tel->data.pkt_id & 0xFFU;
+
+        // timestamp
+        pl[8] = (tel->data.timestamp >> 24U) & 0xFFU;
+        pl[9] = (tel->data.timestamp >> 16U) & 0xFFU;
+        pl[10] = (tel->data.timestamp >> 8U) & 0xFFU;
+        pl[11] = tel->data.timestamp & 0xFFU;
+
+        // battery
+        pl[12] = (tel->data.battery >> 8U) & 0xFFU;
+        pl[13] = tel->data.battery & 0xFFU;
+
+        // wind_speed (uint32_t por enquanto)
+        pl[14] = (tel->data.wind_speed >> 24U) & 0xFFU;
+        pl[15] = (tel->data.wind_speed >> 16U) & 0xFFU;
+        pl[16] = (tel->data.wind_speed >> 8U) & 0xFFU;
+        pl[17] = tel->data.wind_speed & 0xFFU;
+
+        // wind_direction
+        pl[18] = (tel->data.wind_direction >> 8U) & 0xFFU;
+        pl[19] = tel->data.wind_direction & 0xFFU;
+
+        // rainfall (uint32_t por enquanto)
+        pl[20] = (tel->data.rainfall >> 24U) & 0xFFU;
+        pl[21] = (tel->data.rainfall >> 16U) & 0xFFU;
+        pl[22] = (tel->data.rainfall >> 8U) & 0xFFU;
+        pl[23] = tel->data.rainfall & 0xFFU;
+
+        // ground_humidity
+        pl[24] = (tel->data.ground_humidity >> 8U) & 0xFFU;
+        pl[25] = tel->data.ground_humidity & 0xFFU;
+
+        // humidity
+        pl[26] = (tel->data.humidity >> 8U) & 0xFFU;
+        pl[27] = tel->data.humidity & 0xFFU;
+
+        // temperature (int16_t)
+        pl[28] = ((uint16_t) tel->data.temperature >> 8U) & 0xFFU;
+        pl[29] = (uint16_t) tel->data.temperature & 0xFFU;
+
+        // co2
+        pl[30] = (tel->data.co2 >> 8U) & 0xFFU;
+        pl[31] = tel->data.co2 & 0xFFU;
+
+        *pkt_pl_len = 32U; // tamanho total do payload
+
+        break;
 
     default:
         err = -1;
