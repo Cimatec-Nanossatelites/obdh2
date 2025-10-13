@@ -43,7 +43,7 @@
 #define TASK_READ_SENSORS_NAME                  "Read Sensors"      /**< Task name. */
 #define TASK_READ_SENSORS_STACK_SIZE            140                 /**< Stack size in bytes. */
 #define TASK_READ_SENSORS_PRIORITY              3                   /**< Task priority. */
-#define TASK_READ_SENSORS_PERIOD_MS             (60000)             /**< Task period in milliseconds. */
+#define TASK_READ_SENSORS_PERIOD_MS             (300000)             /**< Task period in milliseconds. */
 #define TASK_READ_SENSORS_INIT_TIMEOUT_MS       5000                /**< Wait time to initialize the task in milliseconds. */
 
 /**

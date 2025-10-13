@@ -70,7 +70,7 @@
 #define CONFIG_DEV_CURRENT_SENSOR_ENABLED               1
 #define CONFIG_DEV_VOLTAGE_SENSOR_ENABLED               1
 #define CONFIG_DEV_TEMP_SENSOR_ENABLED                  1
-#define CONFIG_DEV_EPS_ENABLED                          0
+#define CONFIG_DEV_EPS_ENABLED                          1
 #define CONFIG_DEV_PAYLOAD_EDC_ENABLED                  0
 #define CONFIG_DEV_ANTENNA_ENABLED                      0
 #define CONFIG_DEV_PAYLOAD_X_ENABLED                    0

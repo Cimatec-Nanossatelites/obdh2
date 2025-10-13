@@ -60,14 +60,14 @@ void vTaskReadTTC(void *p)
     {
         if (ttc_init(TTC_0) != 0)
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error initializing the TTC device!");
-            sys_log_new_line();
+//            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error initializing the TTC device!");
+//            sys_log_new_line();
         }
 
         if (ttc_init(TTC_1) != 0)
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error initializing the TTC device!");
-            sys_log_new_line();
+//            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error initializing the TTC device!");
+//            sys_log_new_line();
         }
 
         if (ttc_get_data(TTC_0, &sat_data_buf.ttc_0.data) == 0)
@@ -76,8 +76,8 @@ void vTaskReadTTC(void *p)
         }
         else
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error reading data from the TTC 0 device!");
-            sys_log_new_line();
+//            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error reading data from the TTC 0 device!");
+//            sys_log_new_line();
         }
 
         if (ttc_get_data(TTC_1, &sat_data_buf.ttc_1.data) == 0)
@@ -86,21 +86,21 @@ void vTaskReadTTC(void *p)
         }
         else
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error reading data from the TTC 1 device!");
-            sys_log_new_line();
+//            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error reading data from the TTC 1 device!");
+//            sys_log_new_line();
         }
 
         /* Checks if there was too many decoding errors on TTC */
         if (ttc_check_failed_pkts(TTC_0) != 0)
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error checking for decode errors from TTC 0 device!");
-            sys_log_new_line();
+//            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error checking for decode errors from TTC 0 device!");
+//            sys_log_new_line();
         }
 
         if (ttc_check_failed_pkts(TTC_1) != 0)
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error checking for decode errors from TTC 1 device!");
-            sys_log_new_line();
+//            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error checking for decode errors from TTC 1 device!");
+//            sys_log_new_line();
         }
 
         vTaskDelayUntil(&last_cycle, pdMS_TO_TICKS(TASK_READ_TTC_PERIOD_MS));
