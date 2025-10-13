@@ -123,6 +123,8 @@
 
 #define CONFIG_MEM_CIMATELITE_DATA_START_PAGE                  500000U
 #define CONFIG_MEM_CIMATELITE_DATA_END_PAGE                    510000U
+#define PAYLOAD_MAX_TRANSMIT                            10
+#define PAGE_SIZE           ((uint32_t)256UL)
 
 
 /* Health Check Config Parameters */
@@ -167,7 +169,7 @@
 #define CONFIG_DRV_ISIS_ANTENNA_ENABLED                 0
 #define CONFIG_DRV_SL_ANTENNA_ENABLED                   0
 
-#define PAYLOAD_MAX_TRANSMIT                            10
+
 
 #endif
 
