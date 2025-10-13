@@ -48,7 +48,7 @@ dev_ext_flash_return_t Dev_Mem_External_Flash_Read(uint32_t Address, uint8_t *Da
   return DEV_EXT_FLASH_OK;
 }
 
-dev_ext_flash_return_t Dev_Mem_External_Flash_Write(uint8_t ID, uint32_t Flash_Address, uint8_t *Flash_Data, uint32_t Data_Size) {
+dev_ext_flash_return_t Dev_Mem_External_Flash_Write(uint32_t Flash_Address, uint8_t *Flash_Data, uint32_t Data_Size) {
   dev_ext_flash_return_t MEM_RetCode;
   uint8_t Memory_Status;
   uint8_t TXData[4];
@@ -84,7 +84,7 @@ dev_ext_flash_return_t Dev_Mem_External_Flash_Write(uint8_t ID, uint32_t Flash_A
 }
 
 
-dev_ext_flash_return_t Dev_Mem_External_Flash_Erase_Sector(uint8_t ID, uint32_t Sector_Address) {
+dev_ext_flash_return_t Dev_Mem_External_Flash_Erase_Sector(uint32_t Sector_Address) {
   dev_ext_flash_return_t MEM_RetCode;
   uint32_t Sector_Physical_Address;
   uint8_t Memory_Status;
