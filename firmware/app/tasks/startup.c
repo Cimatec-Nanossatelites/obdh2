@@ -51,6 +51,7 @@
 #include <devices/payload/payload.h>
 #include <app/structs/satellite.h>
 #include <utils/mem_mng.h>
+#include <utils/pcd_data_queue.h>
 
 #include "startup.h"
 #include "mission_manager.h"
@@ -136,6 +137,7 @@ void vTaskStartup(void *p)
         { // cppcheck-suppress misra-c2012-15.4
             if (media_init(MEDIA_FRAM) == 0)
             {
+                PCD_Queue_Init(); // todo: Achar uma forma de a fila ficar salva na fram
                 /* Check if FRAM is initialized */
                 if (mem_mng_check_fram() == 0)
                 {
@@ -152,6 +154,7 @@ void vTaskStartup(void *p)
                              */
                             mem_mng_load_obdh_data_from_default_values(&sat_data_buf.obdh); // Load the default values
                             sat_data_buf.obdh.data.media.media_data_magic_number =  OBDH_PARAM_MAGIC_NUMBER_VAL; // Program the Magic Number
+                            PCD_Queue_Init();
                             mem_mng_save_obdh_data_to_fram(&sat_data_buf.obdh); // Save this data to FRAM
                         }
 
@@ -180,6 +183,7 @@ void vTaskStartup(void *p)
 
                         /* Load default values to the OBDH data buffer */
                         mem_mng_load_obdh_data_from_default_values(&sat_data_buf.obdh);
+                        PCD_Queue_Init();
 
                         sys_log_print_event_from_module(SYS_LOG_WARNING, TASK_STARTUP_NAME, "Saving default values to FRAM...");
                         sys_log_new_line();
@@ -210,6 +214,7 @@ void vTaskStartup(void *p)
 
                         /* Load default values to the OBDH data buffer */
                         mem_mng_load_obdh_data_from_default_values(&sat_data_buf.obdh);
+                        PCD_Queue_Init();
 
                         sys_log_print_event_from_module(SYS_LOG_WARNING, TASK_STARTUP_NAME, "Saving default values to FRAM...");
                         sys_log_new_line();

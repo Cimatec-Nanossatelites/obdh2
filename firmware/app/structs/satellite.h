@@ -47,6 +47,9 @@
 #include <devices/ttc/ttc_data.h>
 #include <devices/antenna/antenna_data.h>
 
+#include "FreeRTOS.h"
+#include "queue.h"
+
 #include "obdh_data.h"
 
 /**
@@ -235,6 +238,7 @@ typedef struct
     payload_state_t state;          /**< Payload state. */
     cimatelite_telemetry_t cimatelite;
 //    payload_telemetry_t cimatelite;
+    QueueHandle_t xPCDQueue;
 } sat_data_t;
 
 
