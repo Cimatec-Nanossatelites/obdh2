@@ -59,6 +59,8 @@
 #include "pos_det.h"
 #include "startup.h"
 
+#include "utils/pcd_data_queue.h"
+
 xTaskHandle xTaskProcessTCHandle;
 
 /**
@@ -2412,12 +2414,18 @@ static void process_tc_receive_pcd_payload_packet(uint8_t *pkt,
                                                   uint16_t pkt_len)
 {
     uint8_t tc_key[16] = CONFIG_TC_KEY_TRANSMIT_CIMATELTIE_PACKET;
-
+    cimatelite_telemetry_t test_data;
     if (process_tc_validate_hmac(&pkt[35], 20U, &pkt[35], 20U, tc_key, 16U))
     {
         sat_data_buf.cimatelite.timestamp = system_get_time();
 
         memcpy(&sat_data_buf.cimatelite.data, &pkt[1], sizeof(PCD_data_T));
+
+        PCD_SendToQueue(&sat_data_buf.cimatelite);
+
+        if(PCD_QueueIsFull()){
+            PCD_QueueReset();
+        }
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                         "Packet successfully received");

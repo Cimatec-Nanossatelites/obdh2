@@ -45,6 +45,8 @@
 #include "data_log.h"
 #include "startup.h"
 
+#include "utils/pcd_data_queue.h"
+
 xTaskHandle xTaskDataLogHandle;
 
 void vTaskDataLog(void *p)
@@ -221,23 +223,20 @@ void vTaskDataLog(void *p)
         (void) memset(&page_buf[0], 0, 256);
 
         /* Cimatelite Data */
-        (void) memcpy(&page_buf[0], &sat_data_buf.cimatelite,
-                      sizeof(cimatelite_telemetry_t));
-        uint8_t raw_pkt[256];
+
+        cimatelite_telemetry_t cimatelite_data;
+        uint8_t raw_pkt[256] = { };
         cimatelite_telemetry_t cimatelite;
-        media_read(
-                MEDIA_NOR,
-                (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1)
-                        * PAGE_SIZE,
-                raw_pkt, 256);
 
-        memcpy(&cimatelite, raw_pkt, sizeof(cimatelite_telemetry_t));
+        int pcd_queue_count = PCD_QueueGetCount();
 
-        if (sat_data_buf.obdh.data.media.last_page_cimatelite_data
-                - CONFIG_MEM_CIMATELITE_DATA_START_PAGE > 0)
+        if (pcd_queue_count > 0)
         {
-            if (sat_data_buf.cimatelite.data.pkt_id != cimatelite.data.pkt_id && sat_data_buf.cimatelite.data.pkt_id != 0)
+            for (int i = 0; i < pcd_queue_count; i++)
             {
+                PCD_ReceiveFromQueue(&cimatelite_data);
+                (void) memcpy(&page_buf[0], (void*) &cimatelite_data,
+                              sizeof(cimatelite_telemetry_t));
                 if (mem_mng_write_data_to_flash_page(
                         page_buf,
                         &sat_data_buf.obdh.data.media.last_page_cimatelite_data,
@@ -276,41 +275,100 @@ void vTaskDataLog(void *p)
                     sys_log_new_line();
                 }
             }
-        }
-        else
-        {
-            if (mem_mng_write_data_to_flash_page(
-                    page_buf,
-                    &sat_data_buf.obdh.data.media.last_page_cimatelite_data,
-                    nor_info.page_size,
-                    CONFIG_MEM_CIMATELITE_DATA_START_PAGE,
-                    CONFIG_MEM_CIMATELITE_DATA_END_PAGE) == 0)
-            {
-                sys_log_print_event_from_module(
-                        SYS_LOG_INFO,
-                        TASK_DATA_LOG_NAME,
-                        "Writing to Cimatelite X sector, flash page number: ");
-                sys_log_print_hex(
-                        sat_data_buf.obdh.data.media.last_page_cimatelite_data);
-                sys_log_new_line();
 
-                media_read(
-                        MEDIA_NOR,
-                        (sat_data_buf.obdh.data.media.last_page_cimatelite_data
-                                - 1) * PAGE_SIZE,
-                        raw_pkt, 256);
-                memcpy(&cimatelite, raw_pkt, sizeof(cimatelite_telemetry_t));
-
-                sys_log_print_event_from_module(SYS_LOG_INFO,
-                TASK_DATA_LOG_NAME,
-                                                "Cimatelite Read ID: ");
-                sys_log_print_uint(cimatelite.data.pkt_id);
-                sys_log_new_line();
-            }
-
-            (void) memset(&page_buf[0], 0, 256);
         }
 
+//        (void) memcpy(&page_buf[0], &sat_data_buf.cimatelite,
+//                      sizeof(cimatelite_telemetry_t));
+//        uint8_t raw_pkt[256];
+//        cimatelite_telemetry_t cimatelite;
+//        media_read(
+//                MEDIA_NOR,
+//                (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1)
+//                        * PAGE_SIZE,
+//                raw_pkt, 256);
+//
+//        memcpy(&cimatelite, raw_pkt, sizeof(cimatelite_telemetry_t));
+//
+//        if (sat_data_buf.obdh.data.media.last_page_cimatelite_data
+//                - CONFIG_MEM_CIMATELITE_DATA_START_PAGE > 0)
+//        {
+//            if (sat_data_buf.cimatelite.data.pkt_id != cimatelite.data.pkt_id
+//                    && sat_data_buf.cimatelite.data.pkt_id != 0)
+//            {
+//                if (mem_mng_write_data_to_flash_page(
+//                        page_buf,
+//                        &sat_data_buf.obdh.data.media.last_page_cimatelite_data,
+//                        nor_info.page_size,
+//                        CONFIG_MEM_CIMATELITE_DATA_START_PAGE,
+//                        CONFIG_MEM_CIMATELITE_DATA_END_PAGE) == 0)
+//                {
+//                    sys_log_print_event_from_module(
+//                            SYS_LOG_INFO,
+//                            TASK_DATA_LOG_NAME,
+//                            "Writing to Cimatelite I sector, flash page number: ");
+//                    sys_log_print_hex(
+//                            sat_data_buf.obdh.data.media.last_page_cimatelite_data);
+//                    sys_log_new_line();
+//
+//                    media_read(
+//                            MEDIA_NOR,
+//                            (sat_data_buf.obdh.data.media.last_page_cimatelite_data
+//                                    - 1) * PAGE_SIZE,
+//                            raw_pkt, 256);
+//                    memcpy(&cimatelite, raw_pkt,
+//                           sizeof(cimatelite_telemetry_t));
+//
+//                    sys_log_print_event_from_module(SYS_LOG_INFO,
+//                    TASK_DATA_LOG_NAME,
+//                                                    "Cimatelite Read ID: ");
+//                    sys_log_print_uint(cimatelite.data.pkt_id);
+//                    sys_log_new_line();
+//                }
+//                else
+//                {
+//                    sys_log_print_event_from_module(
+//                            SYS_LOG_ERROR,
+//                            TASK_DATA_LOG_NAME,
+//                            "Error writing the Cimatelite data to the flash memory!");
+//                    sys_log_new_line();
+//                }
+//            }
+//        }
+//        else
+//        {
+//            if (mem_mng_write_data_to_flash_page(
+//                    page_buf,
+//                    &sat_data_buf.obdh.data.media.last_page_cimatelite_data,
+//                    nor_info.page_size,
+//                    CONFIG_MEM_CIMATELITE_DATA_START_PAGE,
+//                    CONFIG_MEM_CIMATELITE_DATA_END_PAGE) == 0)
+//            {
+//                sys_log_print_event_from_module(
+//                        SYS_LOG_INFO,
+//                        TASK_DATA_LOG_NAME,
+//                        "Writing to Cimatelite X sector, flash page number: ");
+//                sys_log_print_hex(
+//                        sat_data_buf.obdh.data.media.last_page_cimatelite_data);
+//                sys_log_new_line();
+//
+//                media_read(
+//                        MEDIA_NOR,
+//                        (sat_data_buf.obdh.data.media.last_page_cimatelite_data
+//                                - 1) * PAGE_SIZE,
+//                        raw_pkt, 256);
+//                memcpy(&cimatelite, raw_pkt, sizeof(cimatelite_telemetry_t));
+//
+//                sys_log_print_event_from_module(SYS_LOG_INFO,
+//                TASK_DATA_LOG_NAME,
+//                                                "Cimatelite Read ID: ");
+//                sys_log_print_uint(cimatelite.data.pkt_id);
+//                sys_log_new_line();
+//            }
+//
+//            (void) memset(&page_buf[0], 0, 256);
+//        }
+        (void) memset(&page_buf[0], 0, 256);
         /* END: Plinio Data */
 
         vTaskDelayUntil(&last_cycle, pdMS_TO_TICKS(TASK_DATA_LOG_PERIOD_MS));
