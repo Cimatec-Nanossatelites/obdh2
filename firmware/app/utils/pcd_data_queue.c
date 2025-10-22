@@ -11,7 +11,9 @@ int PCD_Queue_Init()
 {
     int err = 0;
     const uint16_t queue_size = sizeof(cimatelite_telemetry_t);
-    sat_data_buf.xPCDQueue = xQueueCreate(QUEUE_SIZE, queue_size);
+    sat_data_buf.xPCDQueue = xQueueCreateStatic(
+            PCD_QUEUE_LENGTH, queue_size, (uint8_t* )sat_data_buf.xQueuePCDStorage,
+            &sat_data_buf.xPCDQueueBuffer);
 
     if (sat_data_buf.xPCDQueue == NULL)
     {

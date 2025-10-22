@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <structs/satellite.h>
 
-#define QUEUE_SIZE 10
+#define PCD_QUEUE_LENGTH 10
 
 int PCD_Queue_Init();
 int PCD_SendToQueue(cimatelite_telemetry_t *data);

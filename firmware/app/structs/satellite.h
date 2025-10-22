@@ -239,6 +239,8 @@ typedef struct
     cimatelite_telemetry_t cimatelite;
 //    payload_telemetry_t cimatelite;
     QueueHandle_t xPCDQueue;
+    StaticQueue_t xPCDQueueBuffer;
+    cimatelite_telemetry_t xQueuePCDStorage[10];
 } sat_data_t;
 
 

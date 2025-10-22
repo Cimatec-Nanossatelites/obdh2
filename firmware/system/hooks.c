@@ -69,4 +69,45 @@ void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName)   // c
     }
 }
 
+#if (configSUPPORT_STATIC_ALLOCATION == 1)
+/* External Idle and Timer task static memory allocation functions */
+extern void vApplicationGetIdleTaskMemory  (StaticTask_t **ppxIdleTaskTCBBuffer,  StackType_t **ppxIdleTaskStackBuffer,  uint32_t *pulIdleTaskStackSize);
+extern void vApplicationGetTimerTaskMemory (StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize);
+
+/*
+  vApplicationGetIdleTaskMemory gets called when configSUPPORT_STATIC_ALLOCATION
+  equals to 1 and is required for static memory allocation support.
+*/
+void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
+                                   StackType_t **ppxIdleTaskStackBuffer,
+                                   uint32_t *pulIdleTaskStackSize)
+{
+    /* Static allocation for the Idle Task */
+    static StaticTask_t xIdleTaskTCB;
+    static StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE];
+
+    *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
+    *ppxIdleTaskStackBuffer = uxIdleTaskStack;
+    *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+}
+
+/*
+  vApplicationGetTimerTaskMemory gets called when configSUPPORT_STATIC_ALLOCATION
+  equals to 1 and is required for static memory allocation support.
+*/
+void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
+                                    StackType_t **ppxTimerTaskStackBuffer,
+                                    uint32_t *pulTimerTaskStackSize)
+{
+    /* Static allocation for the Timer Service Task */
+    static StaticTask_t xTimerTaskTCB;
+    static StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH];
+
+    *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
+    *ppxTimerTaskStackBuffer = uxTimerTaskStack;
+    *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+}
+
+#endif
+
 /** \} End of hooks group */
