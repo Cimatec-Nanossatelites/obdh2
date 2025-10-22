@@ -2413,18 +2413,52 @@ static void process_tc_transmit_packet(uint8_t *pkt, uint16_t pkt_len)
 static void process_tc_receive_pcd_payload_packet(uint8_t *pkt,
                                                   uint16_t pkt_len)
 {
+
     uint8_t tc_key[16] = CONFIG_TC_KEY_TRANSMIT_CIMATELTIE_PACKET;
-    cimatelite_telemetry_t test_data;
+    cimatelite_telemetry_t temp;
     if (process_tc_validate_hmac(&pkt[35], 20U, &pkt[35], 20U, tc_key, 16U))
     {
         sat_data_buf.cimatelite.timestamp = system_get_time();
 
         memcpy(&sat_data_buf.cimatelite.data, &pkt[1], sizeof(PCD_data_T));
 
-        PCD_SendToQueue(&sat_data_buf.cimatelite);
+        bool duplicate_found = false;
+        uint8_t count = PCD_QueueGetCount();
 
-        if(PCD_QueueIsFull()){
-            PCD_QueueReset();
+        for (uint8_t i = 0; i < count; i++)
+        {
+            PCD_ReceiveFromQueue(&temp);
+
+            if (temp.data.pkt_id == sat_data_buf.cimatelite.data.pkt_id)
+            {
+                temp = sat_data_buf.cimatelite;
+                duplicate_found = true;
+            }
+
+            PCD_SendToQueue(&temp);
+        }
+
+        if (duplicate_found == false)
+        {
+            if (PCD_QueueIsFull())
+            {
+                PCD_ReceiveFromQueue(&temp);
+            }
+
+            if (PCD_SendToQueue(&sat_data_buf.cimatelite) == 0)
+            {
+                sys_log_print_event_from_module(
+                        SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                        "Add new data in Queue with success!");
+                sys_log_new_line();
+            }
+            else
+            {
+                sys_log_print_event_from_module(SYS_LOG_ERROR,
+                                                TASK_PROCESS_TC_NAME,
+                                                "Error adding new data in Queue!");
+                sys_log_new_line();
+            }
         }
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
