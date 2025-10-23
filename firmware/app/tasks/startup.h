@@ -42,7 +42,8 @@
 #include <event_groups.h>
 
 #define TASK_STARTUP_NAME                   "Startup"
-#define TASK_STARTUP_STACK_SIZE             350
+//#define TASK_STARTUP_STACK_SIZE             350
+#define TASK_STARTUP_STACK_SIZE             4096
 #define TASK_STARTUP_PRIORITY               5
 
 /* Status done bit position */

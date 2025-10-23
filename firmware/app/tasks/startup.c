@@ -51,6 +51,7 @@
 #include <devices/payload/payload.h>
 #include <app/structs/satellite.h>
 #include <utils/mem_mng.h>
+#include "string.h"
 
 #include "startup.h"
 #include "mission_manager.h"
@@ -65,27 +66,30 @@ static int media_nor_clean(void);
 
 void vTaskStartup(void *p)
 {
-    (void)p;
+    (void) p;
 
     unsigned int error_counter = 0;
     int err = -1;
 
     /* Logger device initialization */
-    (void)sys_log_init();
+    (void) sys_log_init();
 
     /* Print the FreeRTOS version */
-    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "FreeRTOS ");
+    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME,
+                                    "FreeRTOS ");
     sys_log_print_msg(tskKERNEL_VERSION_NUMBER);
     sys_log_new_line();
 
     /* Print the hardware version */
-    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Hardware revision is ");
+    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME,
+                                    "Hardware revision is ");
     sys_log_print_uint(system_get_hw_version());
     sys_log_new_line();
 
     /* Print the system clocks */
     clocks_config_t clks = clocks_read();
-    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "System clocks: MCLK=");
+    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME,
+                                    "System clocks: MCLK=");
     sys_log_print_uint(clks.mclk_hz);
     sys_log_print_msg(" Hz, SMCLK=");
     sys_log_print_uint(clks.smclk_hz);
@@ -95,7 +99,8 @@ void vTaskStartup(void *p)
     sys_log_new_line();
 
     /* Print last reset cause (code) */
-    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Last reset cause: ");
+    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME,
+                                    "Last reset cause: ");
     sys_log_print_hex(system_get_reset_cause());
     sys_log_new_line();
 
@@ -109,6 +114,26 @@ void vTaskStartup(void *p)
 
 #if defined(CONFIG_DEV_MEDIA_NOR_ENABLED) && (CONFIG_DEV_MEDIA_NOR_ENABLED == 1)
     /* NOR memory initialization */
+#define MEM_TEST_NAME "MEM_TEST"
+
+    // Constant values for test;
+    const uint8_t test_sectors = 1;
+    const uint32_t sector_size4K = 4096;
+    const uint32_t base_addr = 0x00000000;
+    const uint32_t page_size = 256;
+    const uint16_t count_pages_sector = sector_size4K / page_size;
+
+//    const uint32_t die1_base_addr = 0x04000000;
+
+// Transmit e Receive buffer
+    uint8_t tx_buffer[page_size] = { 0 };
+    uint8_t rx_buffer[sector_size4K] = { 0 };
+
+    // Write Test Value
+    memset(tx_buffer, 0x10, page_size);
+
+
+    //Mem Init
     for (int i = 0; i < MEDIA_INIT_MAX_RETRY; ++i)
     {
         if (media_init(MEDIA_NOR) == 0)
@@ -118,11 +143,56 @@ void vTaskStartup(void *p)
         }
     }
 
-    if (err != 0) 
+    for (uint32_t i = 0; i < test_sectors; i++)
+    {
+        uint32_t sector_addr = base_addr + (i * sector_size4K);
+
+        //Verify if sector is erased
+        media_erase(MEDIA_NOR, MEDIA_ERASE_SUB_SECTOR, sector_addr);
+
+        media_read(MEDIA_NOR, sector_addr, rx_buffer, sector_size4K);
+
+        // Write all pages of sector
+        for (uint32_t page = 0; page < count_pages_sector; page++)
+        {
+            uint32_t page_addr = sector_addr + (page * page_size);
+
+            media_write(MEDIA_NOR, page_addr, tx_buffer, page_size);
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+
+        //Read sector after write
+        media_read(MEDIA_NOR, sector_addr, rx_buffer, sector_size4K);
+
+        //Compare pages and write buffer
+        for (uint32_t j = 0; j < count_pages_sector; j++)
+        {
+            uint8_t compare = memcmp(tx_buffer, &rx_buffer[page_size * j], page_size);
+            if(compare != 0){
+//                sys_log_print_event_from_module(
+//                                       SYS_LOG_ERROR, MEM_TEST_NAME,
+//                                       "Valor lido diferente do buffer de escrita ");
+//                sys_log_new_line();
+            }
+        }
+
+        //Erase and Read to verify if sector is erased
+        media_erase(MEDIA_NOR, MEDIA_ERASE_SUB_SECTOR, sector_addr);
+        media_read(MEDIA_NOR, sector_addr, rx_buffer, sector_size4K);
+
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+
+    if (err != 0)
     {
         error_counter++;
+        sys_log_print_event_from_module(
+                SYS_LOG_ERROR, TASK_STARTUP_NAME,
+                "Error in initialization of NOR memory");
+        sys_log_new_line();
     }
-    else 
+
+    else
     {
         err = -1;
     }
@@ -130,7 +200,7 @@ void vTaskStartup(void *p)
 
 #if defined(CONFIG_DEV_MEDIA_FRAM_ENABLED) && (CONFIG_DEV_MEDIA_FRAM_ENABLED == 1)
     /* FRAM memory initialization */
-    if (system_get_hw_version() >= (uint8_t)HW_VERSION_1)
+    if (system_get_hw_version() >= (uint8_t) HW_VERSION_1)
     {
         for (int i = 0; i < MEDIA_INIT_MAX_RETRY; ++i)
         { // cppcheck-suppress misra-c2012-15.4
@@ -140,52 +210,70 @@ void vTaskStartup(void *p)
                 if (mem_mng_check_fram() == 0)
                 {
                     /* Load last saved OBDH data from FRAM */
-                    if (mem_mng_load_obdh_data_from_fram(&sat_data_buf.obdh) == 0)
+                    if (mem_mng_load_obdh_data_from_fram(&sat_data_buf.obdh)
+                            == 0)
                     {
                         err = 0;
                         /**
                          * Check if its is first time of the microcontroller to access FRAM.
                          */
-                        if(sat_data_buf.obdh.data.media.media_data_magic_number  !=  OBDH_PARAM_MAGIC_NUMBER_VAL){
+                        if (sat_data_buf.obdh.data.media.media_data_magic_number
+                                != OBDH_PARAM_MAGIC_NUMBER_VAL)
+                        {
                             /**                             *
                              * This is first microcontroller boot or this data structure is modified. Load the default values
                              */
-                            mem_mng_load_obdh_data_from_default_values(&sat_data_buf.obdh); // Load the default values
-                            sat_data_buf.obdh.data.media.media_data_magic_number =  OBDH_PARAM_MAGIC_NUMBER_VAL; // Program the Magic Number
+                            mem_mng_load_obdh_data_from_default_values(
+                                    &sat_data_buf.obdh); // Load the default values
+                            sat_data_buf.obdh.data.media.media_data_magic_number =
+                            OBDH_PARAM_MAGIC_NUMBER_VAL; // Program the Magic Number
                             mem_mng_save_obdh_data_to_fram(&sat_data_buf.obdh); // Save this data to FRAM
                         }
 
                         if (system_reset_count() == 0)
                         {
-                            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Reset counter: ");
-                            sys_log_print_uint((uint32_t)(sat_data_buf.obdh.data.reset_counter));
+                            sys_log_print_event_from_module(SYS_LOG_INFO,
+                            TASK_STARTUP_NAME,
+                                                            "Reset counter: ");
+                            sys_log_print_uint(
+                                    (uint32_t) (sat_data_buf.obdh.data.reset_counter));
                             sys_log_new_line();
                         }
-                        else 
+                        else
                         {
-                            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_STARTUP_NAME, "Failed to save the reset counter param");
+                            sys_log_print_event_from_module(
+                                    SYS_LOG_ERROR, TASK_STARTUP_NAME,
+                                    "Failed to save the reset counter param");
                             sys_log_new_line();
                         }
 
                         break;
                     }
-                    else 
+                    else
                     {
                         /* Failed to read FRAM data or CRC was not valid */
-                        sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_STARTUP_NAME, "Failed to load OBDH data correctly!");
+                        sys_log_print_event_from_module(
+                                SYS_LOG_ERROR, TASK_STARTUP_NAME,
+                                "Failed to load OBDH data correctly!");
                         sys_log_new_line();
 
-                        sys_log_print_event_from_module(SYS_LOG_WARNING, TASK_STARTUP_NAME, "Loading default values to memory...");
+                        sys_log_print_event_from_module(
+                                SYS_LOG_WARNING, TASK_STARTUP_NAME,
+                                "Loading default values to memory...");
                         sys_log_new_line();
 
                         /* Load default values to the OBDH data buffer */
-                        mem_mng_load_obdh_data_from_default_values(&sat_data_buf.obdh);
+                        mem_mng_load_obdh_data_from_default_values(
+                                &sat_data_buf.obdh);
 
-                        sys_log_print_event_from_module(SYS_LOG_WARNING, TASK_STARTUP_NAME, "Saving default values to FRAM...");
+                        sys_log_print_event_from_module(
+                                SYS_LOG_WARNING, TASK_STARTUP_NAME,
+                                "Saving default values to FRAM...");
                         sys_log_new_line();
 
                         /* Write the OBDH data to the FRAM memory */
-                        if (mem_mng_save_obdh_data_to_fram(&sat_data_buf.obdh) == 0)
+                        if (mem_mng_save_obdh_data_to_fram(&sat_data_buf.obdh)
+                                == 0)
                         {
                             err = 0;
                             break;
@@ -194,28 +282,38 @@ void vTaskStartup(void *p)
                 }
                 else
                 {
-                    sys_log_print_event_from_module(SYS_LOG_WARNING, TASK_STARTUP_NAME, "FRAM was not initialized in previous cycles!");
+                    sys_log_print_event_from_module(
+                            SYS_LOG_WARNING, TASK_STARTUP_NAME,
+                            "FRAM was not initialized in previous cycles!");
                     sys_log_new_line();
 
-                    sys_log_print_event_from_module(SYS_LOG_WARNING, TASK_STARTUP_NAME, "Trying to clean NOR memory!");
+                    sys_log_print_event_from_module(
+                            SYS_LOG_WARNING, TASK_STARTUP_NAME,
+                            "Trying to clean NOR memory!");
                     sys_log_new_line();
 
-                    (void)media_nor_clean();
+                    (void) media_nor_clean();
 
                     /* Initialize FRAM */
                     if (mem_mng_init_fram() == 0)
                     {
-                        sys_log_print_event_from_module(SYS_LOG_WARNING, TASK_STARTUP_NAME, "Loading default values to memory...");
+                        sys_log_print_event_from_module(
+                                SYS_LOG_WARNING, TASK_STARTUP_NAME,
+                                "Loading default values to memory...");
                         sys_log_new_line();
 
                         /* Load default values to the OBDH data buffer */
-                        mem_mng_load_obdh_data_from_default_values(&sat_data_buf.obdh);
+                        mem_mng_load_obdh_data_from_default_values(
+                                &sat_data_buf.obdh);
 
-                        sys_log_print_event_from_module(SYS_LOG_WARNING, TASK_STARTUP_NAME, "Saving default values to FRAM...");
+                        sys_log_print_event_from_module(
+                                SYS_LOG_WARNING, TASK_STARTUP_NAME,
+                                "Saving default values to FRAM...");
                         sys_log_new_line();
 
                         /* Write the OBDH data to the FRAM memory */
-                        if (mem_mng_save_obdh_data_to_fram(&sat_data_buf.obdh) == 0)
+                        if (mem_mng_save_obdh_data_to_fram(&sat_data_buf.obdh)
+                                == 0)
                         {
                             err = 0;
                             break;
@@ -225,7 +323,7 @@ void vTaskStartup(void *p)
             }
         }
 
-        if (err != 0) 
+        if (err != 0)
         {
             error_counter++;
         }
@@ -323,19 +421,21 @@ void vTaskStartup(void *p)
 
     if (error_counter > 0U)
     {
-        sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_STARTUP_NAME, "Boot completed with ");
+        sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_STARTUP_NAME,
+                                        "Boot completed with ");
         sys_log_print_uint(error_counter);
         sys_log_print_msg(" ERROR(S)!");
         sys_log_new_line();
 
-        (void)led_set(LED_FAULT);
+        (void) led_set(LED_FAULT);
     }
     else
     {
-        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Boot completed with SUCCESS!");
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME,
+                                        "Boot completed with SUCCESS!");
         sys_log_new_line();
 
-        (void)led_clear(LED_FAULT);
+        (void) led_clear(LED_FAULT);
     }
 
     sat_data_buf.obdh.data.hw_version = system_get_hw_version();
@@ -352,7 +452,7 @@ void vTaskStartup(void *p)
 #endif
 
     /* Startup task status = Done */
-    (void)xEventGroupSetBits(task_startup_status, TASK_STARTUP_DONE);
+    (void) xEventGroupSetBits(task_startup_status, TASK_STARTUP_DONE);
 
     vTaskSuspend(xTaskStartupHandle);
 }
