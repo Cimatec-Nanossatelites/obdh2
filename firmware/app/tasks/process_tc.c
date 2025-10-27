@@ -294,7 +294,7 @@ void vTaskProcessTC(void *p)
     {
         TickType_t last_cycle = xTaskGetTickCount();
 
-        int pkts = ttc_avail(TTC_1);
+        int pkts = ttc_avail(TTC_0);
 
         if (pkts > 0)
         {
@@ -306,7 +306,7 @@ void vTaskProcessTC(void *p)
             uint8_t pkt[300] = {0};
             uint16_t pkt_len = 0;
 
-            if (ttc_recv(TTC_1, pkt, &pkt_len) == 0)
+            if (ttc_recv(TTC_0, pkt, &pkt_len) == 0)
             {
                 switch(pkt[0])
                 {
@@ -529,7 +529,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len)
 
                                 if (sat_data_buf.obdh.data.mode != OBDH_MODE_HIBERNATION)
                                 {
-                                    if (ttc_send(TTC_0, data_req_ans_raw, data_req_ans_raw_len) != 0)
+                                    if (ttc_send(TTC_1, data_req_ans_raw, data_req_ans_raw_len) != 0)
                                     {
                                         sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting the OBDH data log of memory page ");
                                         sys_log_print_uint(i);
