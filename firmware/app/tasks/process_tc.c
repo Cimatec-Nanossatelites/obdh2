@@ -2238,7 +2238,7 @@ static void process_tc_get_payload_packets(uint8_t *pkt, uint16_t pkt_len)
         uint8_t size;
     } tc_data;
 
-    memcpy(tc_data, pkt, sizeof(tc_data));
+    memcpy(&tc_data, pkt, sizeof(tc_data));
 
     if (tc_data.size <= 6)
     {

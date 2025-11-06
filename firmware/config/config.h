@@ -91,6 +91,10 @@
 /* Ports */
 #define CONFIG_SPI_PORT_0_SPEED_BPS                     1000000UL
 
+
+#define PAGE_SIZE 256
+#define PAYLOAD_MAX_TRANSMIT 5
+
 /* Antenna */
 #define CONFIG_ANTENNA_INDEP_DEPLOY_BURN_TIME_SEC       10U
 #define CONFIG_ANTENNA_SEQ_DEPLOY_BURN_TIME_SEC         20U
