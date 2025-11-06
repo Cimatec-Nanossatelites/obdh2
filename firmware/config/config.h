@@ -47,6 +47,7 @@
 #define CONFIG_TASK_SYSTEM_RESET_ENABLED                1
 #define CONFIG_TASK_READ_SENSORS_ENABLED                1
 #define CONFIG_TASK_GENERAL_TELEMETRY_ENABLED           1
+#define CONFIG_TASK_PAYLOAD_TELEMETRY_ENABLED           1
 #define CONFIG_TASK_TIME_CONTROL_ENABLED                1
 #define CONFIG_TASK_READ_EDC_ENABLED                    0
 #define CONFIG_TASK_READ_EPS_ENABLED                    1
@@ -115,8 +116,23 @@
 #define CONFIG_MEM_TTC_1_DATA_END_PAGE                  227999U
 #define CONFIG_MEM_ANT_DATA_START_PAGE                  228000U
 #define CONFIG_MEM_ANT_DATA_END_PAGE                    284999U
-#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE           57000U
-#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE             113999U
+//#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE           57000U
+//#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE             113999U
+
+//Endereço para o cimatelite com 1 sector de 32KB dentro do intervalo.
+//#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE           57091U
+//#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE             57346U
+
+//#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE           57000U
+//#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE             113999U
+
+
+//Endereço para o cimatelite considerando todos os sectores que começam e terminam dentro do intervalo,
+//Ou seja, eles estão completamente no intervalo das páginas que foi definido anteriormente.
+//ADDR CIMATELITE - RAMON:
+#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE           57088U
+#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE             113920U
+
 #define CONFIG_MEM_EDC_DATA_START_PAGE                  500000U
 #define CONFIG_MEM_EDC_DATA_END_PAGE                    510000U
 #define CONFIG_MEM_SBCD_PKTS_START_PAGE                 399000U

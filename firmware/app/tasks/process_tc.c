@@ -619,17 +619,12 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len)
             sat_data_buf.obdh.data.last_valid_tc = pkt[0];
             sat_data_buf.obdh.data.ts_last_contact = system_get_time();
 
-//            uint32_t start_idx = ((uint32_t) pkt[9] << 24)
-//                    | ((uint32_t) pkt[10] << 16) | ((uint32_t) pkt[11] << 8)
-//                    | (uint32_t) pkt[12];
-//            uint32_t end_idx = ((uint32_t) pkt[13] << 24)
-//                    | ((uint32_t) pkt[14] << 16) | ((uint32_t) pkt[15] << 8)
-//                    | (uint32_t) pkt[16];
-
-            uint32_t start_idx;
-            uint32_t end_idx;
-            memcpy(&start_idx, &pkt[9], sizeof(uint32_t));
-            memcpy(&end_idx, &pkt[13], sizeof(uint32_t));
+            uint32_t start_idx = ((uint32_t) pkt[9] << 24)
+                    | ((uint32_t) pkt[10] << 16) | ((uint32_t) pkt[11] << 8)
+                    | (uint32_t) pkt[12];
+            uint32_t end_idx = ((uint32_t) pkt[13] << 24)
+                    | ((uint32_t) pkt[14] << 16) | ((uint32_t) pkt[15] << 8)
+                    | (uint32_t) pkt[16];
 
             media_info_t nor_info = media_get_info(MEDIA_NOR);
 
@@ -1051,6 +1046,68 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len)
 
                 break;
             }
+            case DATA_ID_PAYLOAD_CIMATELITE:
+            {
+                uint32_t start_page =
+                        sat_data_buf.obdh.data.media.last_page_cimatelite_data
+                                - (uint32_t) end_idx;
+                uint32_t end_page =
+                        sat_data_buf.obdh.data.media.last_page_cimatelite_data
+                                - (uint32_t) start_idx;
+
+                uint8_t page_buf[256] = { 0 };
+
+                if ((start_page >= CONFIG_MEM_CIMATELITE_DATA_START_PAGE)
+                        && (end_page <= CONFIG_MEM_CIMATELITE_DATA_END_PAGE))
+                {
+                    uint32_t i = 0;
+                    for (i = start_page; i <= end_page; i++)
+                    {
+                        if (media_read(MEDIA_NOR, i * nor_info.page_size,
+                                       page_buf, sizeof(cimatelite_telemetry_t))
+                                == 0)
+                        {
+                            /* Requester callsign */
+                            (void) memcpy(&data_req_ans_pkt.payload[0], &pkt[1],
+                                          7);
+
+                            /* Data ID */
+                            data_req_ans_pkt.payload[7] =
+                                    DATA_ID_PAYLOAD_CIMATELITE;
+
+                            /* Format payload */
+                            (void) format_data_request(
+                                    data_req_ans_pkt.payload,
+                                    &data_req_ans_pkt.length,
+                                    DATA_ID_PAYLOAD_CIMATELITE, page_buf);
+
+                            vTaskDelay(pdMS_TO_TICKS(10U));
+
+                            fsat_pkt_encode(&data_req_ans_pkt, data_req_ans_raw,
+                                            &data_req_ans_raw_len);
+
+                            if (sat_data_buf.obdh.data.mode
+                                    != OBDH_MODE_HIBERNATION)
+                            {
+                                if (ttc_send(TTC_1, data_req_ans_raw,
+                                             data_req_ans_raw_len) != 0)
+                                {
+                                    sys_log_print_event_from_module(
+                                            SYS_LOG_ERROR,
+                                            TASK_PROCESS_TC_NAME,
+                                            "Error transmitting the Cimatelite data log of memory page ");
+                                    sys_log_print_uint(i);
+                                    sys_log_print_msg("!");
+                                    sys_log_new_line();
+                                }
+                            }
+                        }
+                        vTaskDelay(pdMS_TO_TICKS(25U));
+                    }
+                }
+
+                break;
+            }
             default:
                 sys_log_print_event_from_module(
                         SYS_LOG_ERROR,
@@ -1281,6 +1338,19 @@ static void process_tc_activate_module(uint8_t *pkt, uint16_t pkt_len)
 
                 break;
             }
+            case MODULE_ID_PERIODIC_PAYLOAD_TELEMETRY:
+            {
+                sys_log_print_event_from_module(
+                        SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                        "Activating the periodic payload telemetry...");
+                sys_log_new_line();
+
+                /* Enable periodic payload telemetry */
+                sat_data_buf.obdh.data.payload_telemetry_on = true;
+                (void) send_tc_feedback(pkt);
+
+                break;
+            }
             default:
                 sys_log_print_event_from_module(SYS_LOG_ERROR,
                 TASK_PROCESS_TC_NAME,
@@ -1376,6 +1446,19 @@ static void process_tc_deactivate_module(uint8_t *pkt, uint16_t pkt_len)
 
                 /* Disable periodic general telemetry */
                 sat_data_buf.obdh.data.general_telemetry_on = false;
+                (void) send_tc_feedback(pkt);
+
+                break;
+            }
+            case MODULE_ID_PERIODIC_PAYLOAD_TELEMETRY:
+            {
+                sys_log_print_event_from_module(
+                        SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+                        "Deactivating the periodic payload telemetry...");
+                sys_log_new_line();
+
+                /* Disable periodic general telemetry */
+                sat_data_buf.obdh.data.payload_telemetry_on = false;
                 (void) send_tc_feedback(pkt);
 
                 break;
@@ -1859,7 +1942,8 @@ static void process_tc_get_payload_data(uint8_t *pkt, uint16_t pkt_len)
             sys_log_new_line();
 
             (void) format_data_request(pkt_broadcast.payload,
-                                       &pkt_broadcast.length, DATA_ID_PAYLOAD_CIMATELITE,
+                                       &pkt_broadcast.length,
+                                       DATA_ID_PAYLOAD_CIMATELITE,
                                        cimatelite_data);
 
 //            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
@@ -2166,8 +2250,16 @@ static void process_tc_get_parameter(uint8_t *pkt, uint16_t pkt_len)
 
 static void process_tc_clear_cimatelite_data(uint8_t *pkt, uint16_t pkt_len)
 {
+
+    //UTILIZAR SOMENTE 1 SECTOR PARA OS DADOS DO CIMATELITE
     int8_t err = 0;
-    uint32_t CimateliteSectorAddress = 0x2048000000; // TODO: Ajustar aqui o setor dos dados do cimatelite
+    uint32_t sector_64KB_size = 65536;
+    uint32_t CimateliteStartSectorAddress =
+    CONFIG_MEM_CIMATELITE_DATA_START_PAGE * PAGE_SIZE; // TODO: Ajustar aqui o setor dos dados do cimatelite
+    uint8_t sectors_lenght = 223; // 445 - 223 (sector final - sector inicial)
+
+    //variaveis para testar telecomando
+    uint8_t buffer[256];
 
     if (pkt_len >= 24U)
     {
@@ -2181,17 +2273,48 @@ static void process_tc_clear_cimatelite_data(uint8_t *pkt, uint16_t pkt_len)
             sat_data_buf.obdh.data.last_valid_tc = pkt[0];
             sat_data_buf.obdh.data.ts_last_contact = system_get_time();
 
-            if (media_erase(MEDIA_NOR, MEDIA_ERASE_SECTOR,
-                            CimateliteSectorAddress) != 0)
+            for (uint8_t i = 0; i < sectors_lenght; i++)
             {
-                sys_log_print_event_from_module(
-                        SYS_LOG_ERROR, TASK_PROCESS_TC_NAME,
-                        "Error erasing Cimatelite memory!");
-                sys_log_new_line();
-                err = -1;
+                err = media_erase(
+                        MEDIA_NOR, MEDIA_ERASE_SECTOR,
+                        CimateliteStartSectorAddress + (i * sector_64KB_size));
+                if (err != 0)
+                {
+                    sys_log_print_event_from_module(
+                            SYS_LOG_ERROR, TASK_PROCESS_TC_NAME,
+                            "Error erasing Cimatelite Sector: ");
+                    sys_log_print_uint(i + 1);
+                    sys_log_new_line();
+                }
             }
+
+            for (uint16_t i = 0; i < sectors_lenght; i++)
+            {
+                uint32_t sector_addr = CimateliteStartSectorAddress
+                        + (i * sector_64KB_size);
+
+                media_read(MEDIA_NOR, sector_addr, (uint8_t*) &buffer,
+                           sizeof(buffer));
+
+                for (uint16_t j = 0; j < sizeof(buffer); j++)
+                {
+                    if (buffer[j] != 0xFF)
+                    {
+                        sys_log_print_event_from_module(
+                                SYS_LOG_ERROR, TASK_PROCESS_TC_NAME,
+                                "Error erasing Cimatelite Sector: ");
+                        sys_log_print_uint(i + 1);
+                        sys_log_new_line();
+                    }
+                }
+            }
+
             if (err == 0)
             {
+                sys_log_print_event_from_module(SYS_LOG_INFO,
+                TASK_PROCESS_TC_NAME,
+                                                "Erase Cimatelite Memory!");
+                sys_log_new_line();
                 sat_data_buf.obdh.data.media.last_page_cimatelite_data =
                 OBDH_PARAM_MEDIA_LAST_CIMATELITE_DEFAULT_VAL;
                 (void) send_tc_feedback(pkt);
@@ -2611,8 +2734,9 @@ static int8_t format_data_request(uint8_t *pkt_pl, uint16_t *pkt_pl_len,
         pl[92] = (tel->data.ts_last_contact >> 16U) & 0xFFU;
         pl[93] = (tel->data.ts_last_contact >> 8U) & 0xFFU;
         pl[94] = tel->data.ts_last_contact & 0xFFU;
+        pl[95] = tel->data.payload_telemetry_on;
 
-        *pkt_pl_len = (uint16_t) 103U; /* 7b RQ CALLSIGN + 1b TC ID + 95b OBDH DATA */
+        *pkt_pl_len = (uint16_t) 104U; /* 7b RQ CALLSIGN + 1b TC ID + 95b OBDH DATA */
 
         break;
     }

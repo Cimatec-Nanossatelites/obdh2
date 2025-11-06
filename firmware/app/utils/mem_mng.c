@@ -124,6 +124,7 @@ void mem_mng_load_obdh_data_from_default_values(obdh_telemetry_t *tel)
     tel->data.manual_mode_on                = OBDH_PARAM_MANUAL_MODE_ON_DEFAULT_VAL;
     tel->data.main_edc                      = OBDH_PARAM_MAIN_EDC_DEFAULT_VAL;
     tel->data.general_telemetry_on          = OBDH_PARAM_GENERAL_TELEMETRY_ON_DEFAUL_VAL;
+    tel->data.payload_telemetry_on          = OBDH_PARAM_PAYLOAD_TELEMETRY_ON_DEFAUL_VAL;
     tel->data.ts_read_sensors               = OBDH_PARAM_TS_READ_SENSORS_DEFAULT_VAL;
     tel->data.main_payload_state            = OBDH_PARAM_MAIN_PAYLOAD_STATE_DEFAULT_VAL;
     tel->data.sec_payload_state             = OBDH_PARAM_SEC_PAYLOAD_STATE_DEFAULT_VAL;

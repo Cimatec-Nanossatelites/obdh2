@@ -83,6 +83,7 @@ typedef enum {
     PKT_ID_UPLINK_GET_PAYLOAD_PACKETS = 0x53,
     PKT_ID_DOWNLINK_GET_PAYLOAD_PACKETS = 0x54,
     PKT_ID_UPLINK_PCD_TRANSMIT_PAYLOAD = 0x55,
+    PKT_ID_DOWNLINK_PAYLOAD_TELEMETRY = 0x56,
 
 } packet_id_e;
 
@@ -110,9 +111,10 @@ typedef enum {
  * \brief Modules IDs.
  */
 typedef enum {
-    MODULE_ID_BATTERY_HEATER           = 1,
-    MODULE_ID_BEACON                   = 2,
-    MODULE_ID_PERIODIC_TELEMETRY       = 3,
+    MODULE_ID_BATTERY_HEATER             = 1,
+    MODULE_ID_BEACON                     = 2,
+    MODULE_ID_PERIODIC_TELEMETRY         = 3,
+    MODULE_ID_PERIODIC_PAYLOAD_TELEMETRY = 4,
 } module_id_e;
 
 /**

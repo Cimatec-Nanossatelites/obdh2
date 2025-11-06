@@ -274,7 +274,7 @@ void vTaskGeneralTelemetry(void *p)
                 {
                     sys_log_print_event_from_module(
                             SYS_LOG_INFO, TASK_GENERAL_TELEMETRY_NAME,
-                            "Telemtria geral enviada com sucesso.");
+                            "Telemetria geral enviada com sucesso.");
                     sys_log_new_line();
                 }
             }
