@@ -78,10 +78,9 @@ typedef enum {
     PKT_ID_UPLINK_TRANSMIT_PACKET     =  0x4E,
     PKT_ID_UPLINK_UPDATE_TLE          =  0x4F,
     PKT_ID_UPLINK_CLEAR_CIMATELITE    =  0x50,
-    PKT_ID_UPLINK_GET_PAYLOAD_COUNT =  0X51,
+    PKT_ID_UPLINK_GET_PAYLOAD_COUNT   =  0X51,
     PKT_ID_DOWNLINK_GET_PAYLOAD_COUNT = 0x52,
-    PKT_ID_UPLINK_GET_PAYLOAD_PACKETS = 0x53,
-    PKT_ID_DOWNLINK_GET_PAYLOAD_PACKETS = 0x54,
+    PKT_ID_DOWNLINK_PAYLOAD_TELEMETRY = 0X54
 
 } packet_id_e;
 
@@ -109,9 +108,10 @@ typedef enum {
  * \brief Modules IDs.
  */
 typedef enum {
-    MODULE_ID_BATTERY_HEATER           = 1,
-    MODULE_ID_BEACON                   = 2,
-    MODULE_ID_PERIODIC_TELEMETRY       = 3,
+    MODULE_ID_BATTERY_HEATER             = 1,
+    MODULE_ID_BEACON                     = 2,
+    MODULE_ID_PERIODIC_TELEMETRY         = 3,
+    MODULE_ID_PERIODIC_PAYLOAD_TELEMETRY = 4,
 } module_id_e;
 
 /**
@@ -125,6 +125,7 @@ typedef enum {
     DATA_ID_ANT                        = 4,
     DATA_ID_SBCD_PKTS                  = 5,
     DATA_ID_PAYLOAD_INFO               = 6,
+    DATA_ID_PAYLOAD_CIMATELITE         = 7,
 } data_id_e;
 
 /**
@@ -181,14 +182,32 @@ typedef struct
     uint8_t data[220];              /**< Payload data. */
 } payload_telemetry_t;
 
+
+/**
+ * \brief PCD data buffer.
+ */
+
+typedef struct
+{
+    uint32_t pkt_id;
+    uint32_t timestamp;
+    uint16_t battery;
+    uint32_t wind_speed; //todo: Deve ser float
+    uint16_t wind_direction;
+    uint32_t rainfall; //todo: Deve ser float
+    uint16_t ground_humidity;
+    uint16_t humidity;
+    int16_t temperature;
+    uint16_t co2;
+} PCD_data_T;
+
 /**
  * \brief CIMATELITE Data type.
  */
 typedef struct
 {
     sys_time_t timestamp;           /**< Timestamp of the Payload data. */
-    int32_t Temperatura;
-    int32_t Humidity;
+    PCD_data_T data;
 } cimatelite_telemetry_t;
 
 /**
@@ -214,7 +233,9 @@ typedef struct
     payload_telemetry_t payload_x;  /**< Payload-X telemetry. */
     payload_state_t state;          /**< Payload state. */
     cimatelite_telemetry_t cimatelite;
+//    payload_telemetry_t cimatelite;
 } sat_data_t;
+
 
 /**
  * \brief Satellite data buffer.

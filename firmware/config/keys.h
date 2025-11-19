@@ -59,6 +59,7 @@
 #define CONFIG_TC_KEY_ERASE_CIMATELITE_MEMORY           "C:8RkJE${^>%wYVR" // TODO: programar corretamente a chave para o telecomando do cimatelite
 #define CONFIG_TC_KEY_TRANSMIT_CIMATELITE_COUNT         "C:8RkJE${^>%wYVR" // TODO: programar corretamente a chave para o telecomando do cimatelite
 #define CONFIG_TC_KEY_TRANSMIT_CIMATELTIE_PACKET        "C:8RkJE${^>%wYVR" // TODO: programar corretamente a chave para o telecomando do cimatelite
+#define CONFIG_TC_KEY_TRANSMIT_PCD_PACKET               "C:8RkJE${^>%wYVR" // TODO: programar corretamente a chave para o telecomando do cimatelite
 
 #endif /* KEYS_H_ */
 

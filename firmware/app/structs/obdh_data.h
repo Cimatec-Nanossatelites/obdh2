@@ -85,6 +85,7 @@
 #define OBDH_PARAM_ID_BIN_TLE                   36U /**< Compact binary TLE line. More about the format on libpredict */
 #define OBDH_PARAM_ID_TS_POSITION               37U /**< Timestamp of the last position determination. */
 #define OBDH_PARAM_ID_TS_LAST_CONTACT           38U /**< Timestamp of the last received TC by ground station. */
+#define OBDH_PARAM_ID_PAYLOAD_TELEMETRY_ON      39U
 
 /* Default values */
 #define OBDH_TIMESTAMP_DEFAULT_VAL                      0U
@@ -108,6 +109,7 @@
 #define OBDH_PARAM_MAIN_PAYLOAD_STATE_DEFAULT_VAL       0U
 #define OBDH_PARAM_SEC_PAYLOAD_STATE_DEFAULT_VAL        0U
 #define OBDH_PARAM_GENERAL_TELEMETRY_ON_DEFAUL_VAL      1U
+#define OBDH_PARAM_PAYLOAD_TELEMETRY_ON_DEFAUL_VAL      0U
 #define OBDH_PARAM_POSITION_TIMESTAMP_DEFAULT_VAL       0U
 #define OBDH_PARAM_POSITION_TS_LAST_TLE_UPT_DEFAULT_VAL 0U
 #define OBDH_PARAM_POSITION_BIN_TLE_DEFAULT_VAL         {0x00, 0x19, 0x40, 0x50, 0x14, 0x90, 0xFC, 0x7C, 0x92, 0xCE, 0x00, 0x00, 0x1C, 0xA3, 0x43, 0x4E, 0x4F, 0xCC, 0x43, 0x19, 0xCA, 0x37, 0x3A, 0x87, 0x80, 0x92, 0x40, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x4C, 0x4F, 0x4B, 0xC6, 0xA7, 0xEF, 0x9E, 0x40, 0x2E, 0x9D, 0x69, 0xF3, 0xE4, 0x93, 0xBE} /* HORYU-4 TLE converted to libpredict compact format */
@@ -122,6 +124,7 @@
 #define OBDH_PARAM_MEDIA_LAST_EDC_DATA_DEFAULT_VAL      CONFIG_MEM_EDC_DATA_START_PAGE
 #define OBDH_PARAM_MEDIA_LAST_PX_DATA_DEFAULT_VAL       CONFIG_MEM_PX_DATA_START_PAGE
 #define OBDH_PARAM_MEDIA_LAST_SBCD_PKTS_DEFAULT_VAL     CONFIG_MEM_SBCD_PKTS_START_PAGE
+#define OBDH_PARAM_MEDIA_LAST_CIMATELITE_DEFAULT_VAL    CONFIG_MEM_CIMATELITE_DATA_START_PAGE
 #define OBDH_PARAM_TS_READ_SENSORS_DEFAULT_VAL          0U
 #define OBDH_PARAM_TS_LAST_CONTACT_TIME_DEFAULT_VAL     0U
 #define OBDH_PARAM_MAGIC_NUMBER_VAL                     0xDEADBEEF
@@ -189,6 +192,7 @@ typedef struct
     bool ant_deployment_executed;   /**< Antenna deployment executed flag. */
     bool manual_mode_on;		    /**< Manual operation mode selection flag. */
     bool general_telemetry_on;      /**< General telemetry on flag. */
+    bool payload_telemetry_on;     /**< Payload telemetry on flag. */
     position_data_t position;       /**< Current position of the satellite. */
 } obdh_data_t;
 

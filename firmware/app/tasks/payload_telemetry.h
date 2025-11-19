@@ -21,7 +21,7 @@
  */
 
 /**
- * \brief General Telemetry task definition.
+ * \brief Payload Telemetry task definition.
  * 
  * \author Gabriel Mariano Marcelino <gabriel.mm8@gmail.com>
  * \author Carlos Augusto Porto Freitas <carlos.portof@hotmail.com>
@@ -35,31 +35,31 @@
  * \{
  */
 
-#ifndef GENERAL_TELEMETRY_H_
-#define GENERAL_TELEMETRY_H_
+#ifndef PAYLOAD_TELEMETRY_H
+#define PAYLOAD_TELEMETRY_H
 
 #include <FreeRTOS.h>
 #include <task.h>
 
-#define TASK_GENERAL_TELEMETRY_NAME                    "General Telemetry" /**< Task name. */
-#define TASK_GENERAL_TELEMETRY_STACK_SIZE              250                 /**< Stack size in bytes. */
-#define TASK_GENERAL_TELEMETRY_PRIORITY                4                   /**< Task priority. */
-#define TASK_GENERAL_TELEMETRY_PERIOD_MS               20000               /**< Task period in milliseconds. */
-#define TASK_GENERAL_TELEMETRY_INITIAL_DELAY_MS        20000               /**< Delay, in milliseconds, before the first execution. */
-#define TASK_GENERAL_TELEMETRY_INIT_TIMEOUT_MS         10000               /**< Wait time to initialize the task in milliseconds. */
+#define TASK_PAYLOAD_TELEMETRY_NAME                    "Payload Telemetry" /**< Task name. */
+#define TASK_PAYLOAD_TELEMETRY_STACK_SIZE              512                 /**< Stack size in bytes. */
+#define TASK_PAYLOAD_TELEMETRY_PRIORITY                4                   /**< Task priority. */
+#define TASK_PAYLOAD_TELEMETRY_PERIOD_MS               30000               /**< Task period in milliseconds. */
+#define TASK_PAYLOAD_TELEMETRY_INITIAL_DELAY_MS        20000               /**< Delay, in milliseconds, before the first execution. */
+#define TASK_PAYLOAD_TELEMETRY_INIT_TIMEOUT_MS         10000               /**< Wait time to initialize the task in milliseconds. */
 
 /**
  * \brief General Telemetry handle.
  */
-extern xTaskHandle xTaskGeneralTelemetryHandle;
+extern xTaskHandle xTaskPayloadTelemetryHandle;
 
 /**
- * \brief General Telemetry task.
+ * \brief Payload Telemetry task.
  *
  * \return None.
  */
-void vTaskGeneralTelemetry(void* p);
+void vTaskPayloadTelemetry(void* p);
 
-#endif /* GENERAL_TELEMETRY_H_ */
+#endif /* PAYLOAD_TELEMETRY_H_ */
 
-/** \} End of general_telemetry group */
+/** \} End of Payload Telemetry group */

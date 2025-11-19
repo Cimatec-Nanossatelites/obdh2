@@ -60,6 +60,7 @@
 #include "mem_check.h"
 #include "mission_manager.h"
 #include "mode_check.h"
+#include "payload_telemetry.h"
 
 static void create_queues(void);
 
@@ -119,6 +120,16 @@ void create_tasks(void)
     if (xTaskGeneralTelemetryHandle == NULL)
     {
         /* Error creating the general telemetry task */
+    }
+#endif /* CONFIG_TASK_GENERAL_TELEMETRY_ENABLED */
+
+
+#if defined(CONFIG_TASK_PAYLOAD_TELEMETRY_ENABLED) && (CONFIG_TASK_PAYLOAD_TELEMETRY_ENABLED == 1)
+    (void)xTaskCreate(vTaskPayloadTelemetry, TASK_PAYLOAD_TELEMETRY_NAME, TASK_PAYLOAD_TELEMETRY_STACK_SIZE, NULL, TASK_PAYLOAD_TELEMETRY_PRIORITY, &xTaskPayloadTelemetryHandle);
+
+    if (xTaskPayloadTelemetryHandle == NULL)
+    {
+        /* Error creating the payload telemetry task */
     }
 #endif /* CONFIG_TASK_GENERAL_TELEMETRY_ENABLED */
 
