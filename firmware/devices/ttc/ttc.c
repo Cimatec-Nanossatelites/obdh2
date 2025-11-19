@@ -212,8 +212,8 @@ int ttc_get_data(ttc_e dev, ttc_data_t *data)
         case TTC_0:     ttc_config = ttc_0_config;  err = 0;    break;
         case TTC_1:     ttc_config = ttc_1_config;  err = 0;    break;
         default:
-//            sys_log_print_event_from_module(SYS_LOG_ERROR, TTC_MODULE_NAME, "Error initializing the TTC device! Invalid device!");
-//            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_ERROR, TTC_MODULE_NAME, "Error initializing the TTC device! Invalid device!");
+            sys_log_new_line();
 
             break;
     }
@@ -224,10 +224,10 @@ int ttc_get_data(ttc_e dev, ttc_data_t *data)
         {
             if (sl_ttc2_read_hk_data(&ttc_config, data) != 0)
             {
-//                sys_log_print_event_from_module(SYS_LOG_ERROR, TTC_MODULE_NAME, "Error reading the data from the TTC device ");
-//                sys_log_print_uint(ttc_config.id);
-//                sys_log_print_msg("!");
-//                sys_log_new_line();
+                sys_log_print_event_from_module(SYS_LOG_ERROR, TTC_MODULE_NAME, "Error reading the data from the TTC device ");
+                sys_log_print_uint(ttc_config.id);
+                sys_log_print_msg("!");
+                sys_log_new_line();
 
                 err = -1;
             }
@@ -413,16 +413,16 @@ int ttc_check_failed_pkts(ttc_e dev)
             /* Try to reset TTC */
             if (ttc_set_param(dev, SL_TTC2_REG_RESET_DEVICE, 0x01U) != 0)
             {
-//                sys_log_print_event_from_module(SYS_LOG_ERROR, TTC_MODULE_NAME, "Failed to reset TTC device after too many failed packets!");
-//                sys_log_new_line();
+                sys_log_print_event_from_module(SYS_LOG_ERROR, TTC_MODULE_NAME, "Failed to reset TTC device after too many failed packets!");
+                sys_log_new_line();
                 err = -1;
             }
         }
     }
     else 
     {
-//        sys_log_print_event_from_module(SYS_LOG_ERROR, TTC_MODULE_NAME, "Failed to read number of failed packets from TTC device!");
-//        sys_log_new_line();
+        sys_log_print_event_from_module(SYS_LOG_ERROR, TTC_MODULE_NAME, "Failed to read number of failed packets from TTC device!");
+        sys_log_new_line();
         err = -1;
     }
 
