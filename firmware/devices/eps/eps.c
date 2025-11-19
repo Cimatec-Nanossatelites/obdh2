@@ -198,10 +198,10 @@ int eps_get_data(eps_data_t *data)
         }
         else
         {
-//            sys_log_print_event_from_module(SYS_LOG_ERROR, EPS_MODULE_NAME, "Error reading the data! (error ");
-//            sys_log_print_int(err_drv);
-//            sys_log_print_msg(")");
-//            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_ERROR, EPS_MODULE_NAME, "Error reading the data! (error ");
+            sys_log_print_int(err_drv);
+            sys_log_print_msg(")");
+            sys_log_new_line();
         }
     }
     else

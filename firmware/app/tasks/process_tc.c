@@ -274,16 +274,6 @@ static void process_tc_clear_cimatelite_data(uint8_t *pkt, uint16_t pkt_len);
 
 static void process_tc_get_payload_count(uint8_t *pkt, uint16_t pkt_len);
 
-/**
- * \brief Transmit packet telecommand.
- *
- * \param[in] pkt is the packet to process.
- *
- * \param[in] pkt_len is the number of bytes of the given packet.
- *
- * \return None.
- */
-static void process_tc_get_payload_packets(uint8_t *pkt, uint16_t pkt_len);
 
 /**
  * \brief Transmit packet telecommand.
@@ -520,14 +510,6 @@ void vTaskProcessTC(void *p)
                             "Executing the TC \" Get Payload Count\"...");
                     sys_log_new_line();
                     process_tc_get_payload_count(pkt, pkt_len);
-                    break;
-
-                case PKT_ID_UPLINK_GET_PAYLOAD_PACKETS:
-                    sys_log_print_event_from_module(
-                            SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                            "Executing the TC \"Get Payload Packets\"...");
-                    sys_log_new_line();
-                    process_tc_get_payload_packets(pkt, pkt_len);
                     break;
 
                 case PKT_ID_UPLINK_PCD_TRANSMIT_PAYLOAD:
@@ -1946,12 +1928,6 @@ static void process_tc_get_payload_data(uint8_t *pkt, uint16_t pkt_len)
                                        DATA_ID_PAYLOAD_CIMATELITE,
                                        cimatelite_data);
 
-//            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-//                                            "Pacote sem NgHam: ");
-//            sys_log_new_line();
-//            sys_log_dump_hex((uint8_t*) &pkt_broadcast,
-//                             sizeof(pkt_broadcast) - 2);
-
             fsat_pkt_encode(&pkt_broadcast, raw_pkt, &raw_pkt_len);
 
             if (sat_data_buf.obdh.data.mode != OBDH_MODE_HIBERNATION)
@@ -2251,15 +2227,14 @@ static void process_tc_get_parameter(uint8_t *pkt, uint16_t pkt_len)
 static void process_tc_clear_cimatelite_data(uint8_t *pkt, uint16_t pkt_len)
 {
 
-    //UTILIZAR SOMENTE 1 SECTOR PARA OS DADOS DO CIMATELITE
     int8_t err = 0;
     uint32_t sector_64KB_size = 65536;
     uint32_t CimateliteStartSectorAddress =
-    CONFIG_MEM_CIMATELITE_DATA_START_PAGE * PAGE_SIZE; // TODO: Ajustar aqui o setor dos dados do cimatelite
+    CONFIG_MEM_CIMATELITE_DATA_START_PAGE * PAGE_SIZE;
     uint8_t sectors_lenght = 223; // 445 - 223 (sector final - sector inicial)
 
     //variaveis para testar telecomando
-    uint8_t buffer[256];
+//    uint8_t buffer[256];
 
     if (pkt_len >= 24U)
     {
@@ -2288,26 +2263,28 @@ static void process_tc_clear_cimatelite_data(uint8_t *pkt, uint16_t pkt_len)
                 }
             }
 
-            for (uint16_t i = 0; i < sectors_lenght; i++)
-            {
-                uint32_t sector_addr = CimateliteStartSectorAddress
-                        + (i * sector_64KB_size);
 
-                media_read(MEDIA_NOR, sector_addr, (uint8_t*) &buffer,
-                           sizeof(buffer));
-
-                for (uint16_t j = 0; j < sizeof(buffer); j++)
-                {
-                    if (buffer[j] != 0xFF)
-                    {
-                        sys_log_print_event_from_module(
-                                SYS_LOG_ERROR, TASK_PROCESS_TC_NAME,
-                                "Error erasing Cimatelite Sector: ");
-                        sys_log_print_uint(i + 1);
-                        sys_log_new_line();
-                    }
-                }
-            }
+            //Bloco de codigo para realizar a leitura dos sectores limpos e validar o tc.
+//            for (uint16_t i = 0; i < sectors_lenght; i++)
+//            {
+//                uint32_t sector_addr = CimateliteStartSectorAddress
+//                        + (i * sector_64KB_size);
+//
+//                media_read(MEDIA_NOR, sector_addr, (uint8_t*) &buffer,
+//                           sizeof(buffer));
+//
+//                for (uint16_t j = 0; j < sizeof(buffer); j++)
+//                {
+//                    if (buffer[j] != 0xFF)
+//                    {
+//                        sys_log_print_event_from_module(
+//                                SYS_LOG_ERROR, TASK_PROCESS_TC_NAME,
+//                                "Error erasing Cimatelite Sector: ");
+//                        sys_log_print_uint(i + 1);
+//                        sys_log_new_line();
+//                    }
+//                }
+//            }
 
             if (err == 0)
             {
@@ -2373,8 +2350,8 @@ static void process_tc_get_payload_count(uint8_t *pkt, uint16_t pkt_len)
         uint8_t raw_pkt[60];
         uint16_t raw_pkt_len;
         uint32_t count = (sat_data_buf.obdh.data.media.last_page_cimatelite_data
-                - CONFIG_MEM_CIMATELITE_DATA_START_PAGE);
-        const uint8_t count_size = 4;
+                - CONFIG_MEM_CIMATELITE_DATA_START_PAGE)-1;
+        const uint8_t count_size = sizeof(uint32_t);
 
         sat_data_buf.obdh.data.last_valid_tc = pkt[0];
         sat_data_buf.obdh.data.ts_last_contact = system_get_time();
@@ -2406,77 +2383,6 @@ static void process_tc_get_payload_count(uint8_t *pkt, uint16_t pkt_len)
                 TASK_PROCESS_TC_NAME,
                 "Error executing the \"Transmit Payload Cimatelite Packets Count\" TC! Invalid key!");
         sys_log_new_line();
-    }
-
-}
-
-static void process_tc_get_payload_packets(uint8_t *pkt, uint16_t pkt_len)
-{
-    struct
-    {
-        uint8_t tc_id;
-        uint32_t start_addr;
-        uint8_t size;
-    } tc_data;
-
-    memcpy(&tc_data, pkt, sizeof(tc_data));
-
-    if (tc_data.size <= 6)
-    {
-
-        uint8_t tc_key[16] = CONFIG_TC_KEY_TRANSMIT_CIMATELTIE_PACKET;
-
-        if (process_tc_validate_hmac(pkt, pkt_len - 20U, &pkt[pkt_len - 20U],
-                                     20U, tc_key, 16U))
-        {
-            fsat_pkt_pl_t pkt_broacast;
-            const uint8_t size_cimatelite = sizeof(cimatelite_telemetry_t);
-            uint8_t raw_pkt[PAYLOAD_MAX_TRANSMIT * size_cimatelite];
-            uint16_t raw_pkt_len;
-            uint32_t page =
-                    sat_data_buf.obdh.data.media.last_page_cimatelite_data
-                            - tc_data.start_addr;
-
-            sat_data_buf.obdh.data.last_valid_tc = pkt[0];
-            sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-
-            for (int i = 0; i < tc_data.size; i++)
-            {
-                media_read(MEDIA_NOR, page, &raw_pkt[i * size_cimatelite],
-                           size_cimatelite);
-                page += PAGE_SIZE;
-            }
-
-            fsat_pkt_add_id(&pkt_broacast, PKT_ID_DOWNLINK_GET_PAYLOAD_PACKETS);
-            (void) fsat_pkt_add_callsign(&pkt_broacast,
-            CONFIG_SATELLITE_CALLSIGN);
-
-            (void) memcpy(pkt_broacast.payload, raw_pkt,
-                          tc_data.size * size_cimatelite);
-            pkt_broacast.length = tc_data.size * size_cimatelite;
-
-            fsat_pkt_encode(&pkt_broacast, raw_pkt, &raw_pkt_len);
-
-            if (sat_data_buf.obdh.data.mode != OBDH_MODE_HIBERNATION)
-            {
-                if (ttc_send(TTC_1, raw_pkt, raw_pkt_len) != 0)
-                {
-                    sys_log_print_event_from_module(
-                            SYS_LOG_ERROR,
-                            TASK_PROCESS_TC_NAME,
-                            "Error transmitting a \"Payload Cimatelite Packets\"!");
-                    sys_log_new_line();
-                }
-            }
-        }
-        else
-        {
-            sys_log_print_event_from_module(
-                    SYS_LOG_ERROR,
-                    TASK_PROCESS_TC_NAME,
-                    "Error executing the \"Transmit Payload Cimatelite Packets\" TC! Invalid key!");
-            sys_log_new_line();
-        }
     }
 
 }
@@ -2615,11 +2521,7 @@ static bool process_tc_validate_hmac(uint8_t *msg, uint16_t msg_len,
         }
     }
 
-//    return res;
-
-    //TODO: SOMENTE PARA TESTE
-
-    return true;
+    return res;
 }
 
 static int8_t format_data_request(uint8_t *pkt_pl, uint16_t *pkt_pl_len,

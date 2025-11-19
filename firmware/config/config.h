@@ -105,34 +105,16 @@
 #define CONFIG_MEM_INIT_WORD                            {228, 80, 142, 227, 77, 121, 176, 244}
 #define CONFIG_MEM_OBDH_DATA_START_PAGE                 0U
 #define CONFIG_MEM_OBDH_DATA_END_PAGE                   56999U
-//#define CONFIG_MEM_EPS_DATA_START_PAGE                  57000U
-//#define CONFIG_MEM_EPS_DATA_END_PAGE                    113999U
-#define CONFIG_MEM_EPS_DATA_START_PAGE                  285000U
-#define CONFIG_MEM_EPS_DATA_END_PAGE                    341999U
-
+#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE           57088U
+#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE             113920U
 #define CONFIG_MEM_TTC_0_DATA_START_PAGE                114000U
 #define CONFIG_MEM_TTC_0_DATA_END_PAGE                  170999U
 #define CONFIG_MEM_TTC_1_DATA_START_PAGE                171000U
 #define CONFIG_MEM_TTC_1_DATA_END_PAGE                  227999U
 #define CONFIG_MEM_ANT_DATA_START_PAGE                  228000U
 #define CONFIG_MEM_ANT_DATA_END_PAGE                    284999U
-//#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE           57000U
-//#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE             113999U
-
-//Endereço para o cimatelite com 1 sector de 32KB dentro do intervalo.
-//#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE           57091U
-//#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE             57346U
-
-//#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE           57000U
-//#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE             113999U
-
-
-//Endereço para o cimatelite considerando todos os sectores que começam e terminam dentro do intervalo,
-//Ou seja, eles estão completamente no intervalo das páginas que foi definido anteriormente.
-//ADDR CIMATELITE - RAMON:
-#define CONFIG_MEM_CIMATELITE_DATA_START_PAGE           57088U
-#define CONFIG_MEM_CIMATELITE_DATA_END_PAGE             113920U
-
+#define CONFIG_MEM_EPS_DATA_START_PAGE                  285000U
+#define CONFIG_MEM_EPS_DATA_END_PAGE                    341999U
 #define CONFIG_MEM_EDC_DATA_START_PAGE                  500000U
 #define CONFIG_MEM_EDC_DATA_END_PAGE                    510000U
 #define CONFIG_MEM_SBCD_PKTS_START_PAGE                 399000U

@@ -60,14 +60,14 @@ void vTaskReadTTC(void *p)
     {
         if (ttc_init(TTC_0) != 0)
         {
-//            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error initializing the TTC device!");
-//            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error initializing the TTC device!");
+            sys_log_new_line();
         }
 
         if (ttc_init(TTC_1) != 0)
         {
-//            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error initializing the TTC device!");
-//            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_TTC_NAME, "Error initializing the TTC device!");
+            sys_log_new_line();
         }
 
         if (ttc_get_data(TTC_0, &sat_data_buf.ttc_0.data) == 0)

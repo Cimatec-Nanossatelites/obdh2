@@ -96,8 +96,8 @@ void vTaskReadEPS(void *p)
 
         if (retry_count == 0U)
         {
-//            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_EPS_NAME, "Max retries reached trying to read data from EPS!!!");
-//            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_EPS_NAME, "Max retries reached trying to read data from EPS!!!");
+            sys_log_new_line();
         }
 
         vTaskDelayUntil(&last_cycle, pdMS_TO_TICKS(TASK_READ_EPS_PERIOD_MS));

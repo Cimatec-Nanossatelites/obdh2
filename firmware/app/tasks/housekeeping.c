@@ -99,8 +99,8 @@ void vTaskHousekeeping(void *p)
         }
         else 
         {
-//            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_HOUSEKEEPING_NAME, "Saving obdh data to fram...");
-//            sys_log_new_line();
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_HOUSEKEEPING_NAME, "Saving obdh data to fram...");
+            sys_log_new_line();
         }
         
         vTaskDelayUntil(&last_cycle, pdMS_TO_TICKS(TASK_HOUSEKEEPING_PERIOD_MS));
