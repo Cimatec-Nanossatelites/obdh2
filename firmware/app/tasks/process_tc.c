@@ -710,7 +710,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len)
                             if (sat_data_buf.obdh.data.mode
                                     != OBDH_MODE_HIBERNATION)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw,
+                                if (ttc_send(TTC_1, data_req_ans_raw,
                                              data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(
@@ -769,7 +769,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len)
                             if (sat_data_buf.obdh.data.mode
                                     != OBDH_MODE_HIBERNATION)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw,
+                                if (ttc_send(TTC_1, data_req_ans_raw,
                                              data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(
@@ -828,7 +828,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len)
                             if (sat_data_buf.obdh.data.mode
                                     != OBDH_MODE_HIBERNATION)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw,
+                                if (ttc_send(TTC_1, data_req_ans_raw,
                                              data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(
@@ -888,7 +888,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len)
                             if (sat_data_buf.obdh.data.mode
                                     != OBDH_MODE_HIBERNATION)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw,
+                                if (ttc_send(TTC_1, data_req_ans_raw,
                                              data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(
@@ -948,7 +948,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len)
                             if (sat_data_buf.obdh.data.mode
                                     != OBDH_MODE_HIBERNATION)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw,
+                                if (ttc_send(TTC_1, data_req_ans_raw,
                                              data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(
@@ -1009,7 +1009,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len)
                             if (sat_data_buf.obdh.data.mode
                                     != OBDH_MODE_HIBERNATION)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw,
+                                if (ttc_send(TTC_1, data_req_ans_raw,
                                              data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(
@@ -2197,7 +2197,7 @@ static void process_tc_get_parameter(uint8_t *pkt, uint16_t pkt_len)
 
                 if (sat_data_buf.obdh.data.mode != OBDH_MODE_HIBERNATION)
                 {
-                    if (ttc_send(TTC_0, param_pl_raw, param_pl_raw_len) != 0)
+                    if (ttc_send(TTC_1, param_pl_raw, param_pl_raw_len) != 0)
                     {
                         sys_log_print_event_from_module(
                                 SYS_LOG_ERROR,
@@ -2416,7 +2416,7 @@ static void process_tc_transmit_packet(uint8_t *pkt, uint16_t pkt_len)
 
                 if (sat_data_buf.obdh.data.mode != OBDH_MODE_HIBERNATION)
                 {
-                    if (ttc_send(TTC_0, raw_pkt, raw_pkt_len) != 0)
+                    if (ttc_send(TTC_1, raw_pkt, raw_pkt_len) != 0)
                     {
                         sys_log_print_event_from_module(
                                 SYS_LOG_ERROR, TASK_PROCESS_TC_NAME,
