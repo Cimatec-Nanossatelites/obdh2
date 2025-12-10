@@ -1,0 +1,3 @@
+[submodule "firmware/Middlewares/littlefs"]
+	path = firmware/Middlewares/littlefs
+	url = https://github.com/littlefs-project/littlefs.git
