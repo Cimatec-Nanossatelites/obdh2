@@ -487,6 +487,8 @@ int mt25q_mutex_take(void);
  */
 int mt25q_mutex_give(void);
 
+int mt25q_4K_sector_erase(uint32_t sub);
+
 #endif /* MT25Q_H_ */
 
 /** \} End of mt25q group */

@@ -631,6 +631,76 @@ int mt25q_sub_sector_erase(mt25q_sector_t sub)
     return err;
 }
 
+int mt25q_4K_sector_erase(uint32_t sub)
+{
+    int err = -1, i = 0;
+    uint8_t cmd = MT25Q_4KB_SUBSECTION_ERASE;
+    uint8_t adr_arr[4] = {0};
+
+    if (mt25q_mutex_take() == 0)
+    {
+        /* Check whether any previous Write, Program or Erase cycle is on-going */
+        if (!mt25q_is_busy())
+        {
+            /* Disable Write protection */
+            if (mt25q_write_enable() == 0)
+            {
+               
+                if (mt25q_fdo.num_adr_byte == MT25Q_ADDRESS_MODE_3_BYTE)
+                {
+                    adr_arr[0] = (uint8_t)((sub >> 16) & 0xFFU);
+                    adr_arr[1] = (uint8_t)((sub >> 8) & 0xFFU);
+                    adr_arr[2] = (uint8_t)((sub >> 0) & 0xFFU);
+                }
+                else
+                {
+                    adr_arr[0] = (uint8_t)((sub >> 24) & 0xFFU);
+                    adr_arr[1] = (uint8_t)((sub >> 16) & 0xFFU);
+                    adr_arr[2] = (uint8_t)((sub >> 8) & 0xFFU);
+                    adr_arr[3] = (uint8_t)((sub >> 0) & 0xFFU);
+                }
+                if (mt25q_spi_select() == 0)
+                {
+                    /* Write the erase command */
+                    if (mt25q_spi_write_only(&cmd, 1) == 0)
+                    {
+                        /* Write the address */
+                        if (mt25q_spi_write_only(adr_arr, mt25q_fdo.num_adr_byte) == 0)
+                        {
+                            if (mt25q_spi_unselect() == 0)
+                            {
+                                /* Wait till complete */
+                                for(i = 0; i < MT25Q_SECTOR_ERASE_TIMEOUT_MS; i++)
+                                {
+                                    if (!mt25q_is_busy())
+                                    {
+                                        break;
+                                    }
+                                    mt25q_delay_ms(1);
+                                }
+                                uint8_t flag = 0;
+                                if (mt25q_read_flag_status_register(&flag) == 0)
+                                {
+                                    if (mt25q_clear_flag_status_register() == 0)
+                                    {
+                                        if (i < MT25Q_SECTOR_ERASE_TIMEOUT_MS)
+                                        {
+                                            err = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        (void)mt25q_mutex_give();
+    }
+
+    return err;
+}
+
 int mt25q_write(uint32_t adr, uint8_t *data, uint16_t len)
 {
     int err = -1;
