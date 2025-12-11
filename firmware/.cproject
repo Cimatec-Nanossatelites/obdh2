@@ -102,7 +102,7 @@
                         </toolChain>
                     </folderInfo>
                     <sourceEntries>
-                        <entry excluding="lnk_msp430f6659.cmd|app/libs/ff14/documents|tests" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+                        <entry excluding="Middlewares/littlefs/bd|Middlewares/littlefs/tests|Middlewares/littlefs/scripts|Middlewares/littlefs/runners|Middlewares/littlefs/benches|lnk_msp430f6659.cmd|app/libs/ff14/documents|tests" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
                     </sourceEntries>
                 </configuration>
             </storageModule>

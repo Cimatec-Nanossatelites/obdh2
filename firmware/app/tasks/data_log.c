@@ -85,12 +85,12 @@ const struct lfs_config cfg = {
     .sync  = _flash_sync,
 
     // block device configuration
-    .read_size = 256,
-    .prog_size = 256,
+    .read_size = 32,
+    .prog_size = 32,
     .block_size = 4096,
-    .block_count = 128,
-    .cache_size = 16,
-    .lookahead_size = 16,
+    .block_count = 32768,
+    .cache_size = 32,
+    .lookahead_size = 8,
     .block_cycles = 500,
 };
 
@@ -117,8 +117,12 @@ void vTaskDataLog(void *p)
     // reformat if we can't mount the filesystem
     // this should only happen on the first boot
     if (err) {
-        lfs_format(&lfs, &cfg);
-        lfs_mount(&lfs, &cfg);
+        err = lfs_format(&lfs, &cfg);
+        if(err == 0){
+            err = lfs_mount(&lfs, &cfg);
+        }else{
+            while(1);
+        }        
     }
 
 

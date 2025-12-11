@@ -44,7 +44,8 @@ void main(void)
 {
     /* Watchdog device initialization */
     int err = watchdog_init();
-
+    
+    
     /* System clocks configuration */
     clocks_config_t clk_conf = {0};
 
