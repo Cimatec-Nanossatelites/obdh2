@@ -39,6 +39,7 @@
 #define MEM_MNG_H_
 
 #include <system/system.h>
+#include <conops/util/cmd_queue.h>
 
 #include <app/structs/satellite.h>
 
@@ -147,6 +148,24 @@ void mem_mng_reset_page_count(media_data_t *media);
  * \return The status/error code.
  */
 int mem_mng_erase_flash(obdh_telemetry_t *tel);
+
+/**
+ * \brief Loads the scheduled telecommands queue from FRAM.
+ *
+ * \param[in] queue is a pointer to store the read data.
+ *
+ * \return The status/error code.
+ */
+int mem_mng_load_tc_queue_from_fram(struct conops_cmd_queue *queue);
+
+/**
+ * \brief Saves the scheduled telecommands queue to FRAM.
+ *
+ * \param[in] queue is the Scheduled TC queue to be saved.
+ *
+ * \return The status/error code.
+ */
+int mem_mng_save_tc_queue_to_fram(struct conops_cmd_queue *queue);
 
 #endif /* MEM_MNG_H_ */
 

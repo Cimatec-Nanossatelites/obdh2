@@ -39,6 +39,7 @@
 #include <queue.h>
 
 #include <config/config.h>
+#include <conops/conops.h>
 
 #include "tasks.h"
 #include "startup.h"
@@ -61,6 +62,8 @@
 #include "mission_manager.h"
 #include "mode_check.h"
 #include "payload_telemetry.h"
+#include "antenna_deployment.h"
+#include "sched_tc.h"
 
 static void create_queues(void);
 
@@ -259,6 +262,15 @@ void create_tasks(void)
     }
 #endif /* CONFIG_TASK_HEALTH_CHECK_MODE_ENABLED */
 
+#if defined(CONFIG_TASK_SCHED_TC_ENABLED) && (CONFIG_TASK_SCHED_TC_ENABLED == 1)
+    (void)xTaskCreate(vTaskSchedTC, TASK_SCHED_TC_NAME, TASK_SCHED_TC_STACK_SIZE, NULL, TASK_SCHED_TC_PRIORITY, &xTaskSchedTCHandle);
+
+    if (xTaskSchedTCHandle == NULL)
+    {
+        /* Error creating the Scheduled TC task */
+    }
+#endif /* CONFIG_TASK_MISSION_MANAGER_ENABLED */
+
     create_queues();
     create_event_groups();
 }
@@ -275,7 +287,7 @@ void create_event_groups(void)
 
 static void create_queues(void)
 {
-    event_queue = xQueueCreate(10U, sizeof(event_t));
+    event_queue = xQueueCreate(20U, sizeof(struct conops_event));
 
     if (event_queue == NULL)
     {

@@ -45,7 +45,7 @@
 
 #define TTC_MODULE_NAME            "TTC"
 
-#define TTC_MAX_FAILED_PACKETS     5U
+#define TTC_MAX_FAILED_PACKETS     2U
 
 /**
  * \brief TTC configuration parameters.

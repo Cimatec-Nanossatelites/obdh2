@@ -51,10 +51,10 @@
 #define TASK_POS_DET_PERIOD_MS                  60000               /**< Task period in milliseconds. */
 #define TASK_POS_DET_INIT_TIMEOUT_MS            5000                /**< Wait time to initialize the task in milliseconds. */
 
-#define POS_BRAZIL_LIM_N                        (6L)                /**< Brazil territory North limit (Rounded up) */
-#define POS_BRAZIL_LIM_S                        (-34L)              /**< Brazil territory South limit (Rounded up) */
-#define POS_BRAZIL_LIM_E                        (-35L)              /**< Brazil territory East limit (Rounded up) */
-#define POS_BRAZIL_LIM_W                        (-74L)              /**< Brazil territory West limit (Rounded up) */
+#define POS_BRAZIL_LIM_N                        (6.0f)              /**< Brazil territory North limit (Rounded up) */
+#define POS_BRAZIL_LIM_S                        (-34.0f)            /**< Brazil territory South limit (Rounded up) */
+#define POS_BRAZIL_LIM_E                        (-35.0f)            /**< Brazil territory East limit (Rounded up) */
+#define POS_BRAZIL_LIM_W                        (-74.0f)            /**< Brazil territory West limit (Rounded up) */
 
 /**
  * \brief Position determination task handle.
@@ -64,13 +64,13 @@ extern xTaskHandle xTaskPosDetHandle;
 /**
  * \brief Checks if the satellite is orbiting over Brazil, based on the last available position determined.
  *
- * \param[in] latitude is the latitude of the satellite as a int16_t.
+ * \param[in] latitude is the latitude of the satellite.
  *
- * \param[in] longitude is the longitude of the satellite as a int16_t.
+ * \param[in] longitude is the longitude of the satellite.
  *
  * \return True if the satellite is over Brazil, false if it is not.
  */
-static inline bool is_satellite_in_brazil(int16_t latitude, int16_t longitude)
+static inline bool is_satellite_in_brazil(float latitude, float longitude)
 {
     return ((latitude >= POS_BRAZIL_LIM_S) && (latitude <= POS_BRAZIL_LIM_N) && (longitude >= POS_BRAZIL_LIM_W) && (longitude <= POS_BRAZIL_LIM_E));
 }

@@ -66,7 +66,6 @@ void vTaskReadPX(void *p)
 
     while(1)
     {
-        uint32_t cancel_flag;
         uint32_t active_period_ms;
 
         BaseType_t result = xTaskNotifyWait(0UL, UINT32_MAX, &active_period_ms, pdMS_TO_TICKS(TASK_READ_PX_MAX_WAIT_TIME_MS));
@@ -79,16 +78,6 @@ void vTaskReadPX(void *p)
 
             while (active_period_ms > 0U) 
             {
-                /* Check notifications to break out of the loop if requested */
-                if (xTaskNotifyWait(0UL, PAYLOAD_X_CANCEL_EXPERIMENT_FLAG, &cancel_flag, 0U) == pdTRUE)
-                {
-                    if ((cancel_flag & PAYLOAD_X_CANCEL_EXPERIMENT_FLAG) != 0U)
-                    {
-                        active_period_ms = 0U;
-                        break;
-                    }
-                }
-
                 /* Read data */
                 if (payload_get_data(pl_px_active, PAYLOAD_X_PONG, px_buf.buffer, &px_buf.length) != 0)
                 {
@@ -123,7 +112,12 @@ void vTaskReadPX(void *p)
                 vTaskDelayUntil(&last_cycle, pdMS_TO_TICKS(TASK_READ_PX_PERIOD_MS));
             }
 
-            const event_t px_end = { .event = EV_NOTIFY_PX_FINISHED, .args[0] = 0U, .args[1] = 0U, .args[2] = 0U };
+            const struct conops_event px_end = {
+                .ev_id = EV_PX_FINISHED,
+                .ev_name = "EXP-END",
+                .callback = NULL,
+                .src = 0U,
+            };
 
             if (notify_event_to_mission_manager(&px_end) != 0)
             {

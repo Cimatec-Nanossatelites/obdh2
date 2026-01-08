@@ -39,6 +39,7 @@
 
 #include <FreeRTOS.h>
 #include <task.h>
+#include <system/system.h>
 
 #define TASK_TIME_CONTROL_NAME                  "Time Control"      /**< Task name. */
 #define TASK_TIME_CONTROL_STACK_SIZE            128                 /**< Stack size in bytes. */
@@ -57,6 +58,15 @@ extern xTaskHandle xTaskTimeControlHandle;
  * \return None.
  */
 void vTaskTimeControl(void *p);
+
+/**
+ * \brief Saves a given system time to the non-volatile memory.
+ *
+ * \param[in] tm is the system time value to save.
+ *
+ * \return The status/error code.
+ */
+int time_control_save_sys_time(sys_time_t tm);
 
 #endif /* TIME_CONTROL_H_ */
 

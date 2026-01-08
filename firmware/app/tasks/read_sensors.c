@@ -63,7 +63,7 @@ void vTaskReadSensors(void *p)
         {
             sat_data_buf.obdh.data.current = buf;
 
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_SENSORS_NAME, "Current input current: ");
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_SENSORS_NAME, "Current uC current: ");
             sys_log_print_uint((uint32_t)buf);
             sys_log_print_msg(" mA");
             sys_log_new_line();
@@ -74,7 +74,7 @@ void vTaskReadSensors(void *p)
         {
             sat_data_buf.obdh.data.voltage = buf;
 
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_SENSORS_NAME, "Current input voltage: ");
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_SENSORS_NAME, "Current uC voltage: ");
             sys_log_print_uint((uint32_t)buf);
             sys_log_print_msg(" mV");
             sys_log_new_line();

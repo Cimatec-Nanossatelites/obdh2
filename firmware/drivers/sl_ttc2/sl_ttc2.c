@@ -310,8 +310,10 @@ int sl_ttc2_read_reg(sl_ttc2_config_t *config, uint8_t adr, uint32_t *val)
                 }
                 else
                 {
-                    sys_log_print_event_from_module(SYS_LOG_ERROR, SL_TTC2_MODULE_NAME, "Received invalid CRC!");
-                    sys_log_new_line();
+                    #if defined(CONFIG_DRIVERS_DEBUG_ENABLED) && (CONFIG_DRIVERS_DEBUG_ENABLED == 1)
+                        sys_log_print_event_from_module(SYS_LOG_ERROR, SL_TTC2_MODULE_NAME, "Received invalid CRC!");
+                        sys_log_new_line();
+                    #endif /* CONFIG_DRIVERS_DEBUG_ENABLED */
                 }
             }
             else

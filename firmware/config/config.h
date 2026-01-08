@@ -57,9 +57,10 @@
 #define CONFIG_TASK_PROCESS_TC_ENABLED                  1
 #define CONFIG_TASK_ANTENNA_DEPLOYMENT_ENABLED          0
 #define CONFIG_TASK_POSITION_DETERMINATION_ENABLED      0
-#define CONFIG_TASK_PAYLOAD_X_ENABLED                   0
+#define CONFIG_TASK_PAYLOAD_X_ENABLED                   1
 #define CONFIG_TASK_HOUSEKEEPING_ENABLED                1
-#define CONFIG_TASK_MISSION_MANAGER_ENABLED             0
+#define CONFIG_TASK_MISSION_MANAGER_ENABLED             1
+#define CONFIG_TASK_SCHED_TC_ENABLED                    1
 #define CONFIG_TASK_HEALTH_CHECK_MEM_ENABLED            0
 #define CONFIG_TASK_HEALTH_CHECK_MODE_ENABLED           0
 
@@ -86,6 +87,7 @@
 
 /* Debug and log messages */
 #define CONFIG_DRIVERS_DEBUG_ENABLED                    0
+#define CONFIG_PRINT_OBDH_PARAMS                        1
 
 #define CONFIG_SATELLITE_CALLSIGN                       "PY0EFS"
 
@@ -106,6 +108,7 @@
 #define CONFIG_MEM_ADR_INIT_WORD                        0
 #define CONFIG_MEM_ADR_SYS_TIME                         256
 #define CONFIG_MEM_ADR_SYS_PARAM                        512
+#define CONFIG_MEM_ADR_TC_QUEUE                         1024
 #define CONFIG_MEM_INIT_WORD                            {228, 80, 142, 227, 77, 121, 176, 244}
 #define CONFIG_MEM_OBDH_DATA_START_PAGE                 0U
 #define CONFIG_MEM_OBDH_DATA_END_PAGE                   56999U

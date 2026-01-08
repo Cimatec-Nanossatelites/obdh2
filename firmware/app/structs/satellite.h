@@ -44,6 +44,7 @@
 #include <system/system.h>
 
 #include <devices/eps/eps_data.h>
+#include <drivers/edc/edc.h>
 #include <devices/ttc/ttc_data.h>
 #include <devices/antenna/antenna_data.h>
 
@@ -57,7 +58,7 @@ typedef enum {
     PKT_ID_DOWNLINK_PING_ANS          =  0x02,
     PKT_ID_DOWNLINK_GENERAL_TELEMETRY =  0x10,
     PKT_ID_DOWNLINK_DATA_REQUEST_ANS  =  0x11,
-    PKT_ID_DOWNLINK_PAYLOAD_DATA      =  0x12,
+    PKT_ID_DOWNLINK_SUBSYSTEM_TABLE   =  0x12,
     PKT_ID_DOWNLINK_TC_FEEDBACK       =  0x13,
     PKT_ID_DOWNLINK_PARAM_VALUE       =  0x14,
     PKT_ID_DOWNLINK_PACKET_BROADCAST  =  0x15,
@@ -72,17 +73,17 @@ typedef enum {
     PKT_ID_UPLINK_DEACTIVATE_PAYLOAD  =  0x48,
     PKT_ID_UPLINK_ERASE_MEMORY        =  0x49,
     PKT_ID_UPLINK_FORCE_RESET         =  0x4A,
-    PKT_ID_UPLINK_GET_PAYLOAD_DATA    =  0x4B,
+    PKT_ID_UPLINK_GET_SUBSYSTEM_TABLE =  0x4B,
     PKT_ID_UPLINK_SET_PARAM           =  0x4C,
     PKT_ID_UPLINK_GET_PARAM           =  0x4D,
     PKT_ID_UPLINK_TRANSMIT_PACKET     =  0x4E,
     PKT_ID_UPLINK_UPDATE_TLE          =  0x4F,
-    PKT_ID_UPLINK_CLEAR_CIMATELITE    =  0x50,
-    PKT_ID_UPLINK_GET_PAYLOAD_COUNT   =  0X51,
-    PKT_ID_DOWNLINK_GET_PAYLOAD_COUNT = 0x52,
-    PKT_ID_UPLINK_PCD_TRANSMIT_PAYLOAD = 0x53,
-    PKT_ID_DOWNLINK_PAYLOAD_TELEMETRY = 0X54
-
+    PKT_ID_UPLINK_SCHED_TC            =  0x50,
+    PKT_ID_UPLINK_CLEAR_CIMATELITE    =  0x51,
+    PKT_ID_UPLINK_GET_PAYLOAD_COUNT   =  0X52,
+    PKT_ID_DOWNLINK_GET_PAYLOAD_COUNT = 0x53,
+    PKT_ID_UPLINK_PCD_TRANSMIT_PAYLOAD = 0x54,
+    PKT_ID_DOWNLINK_PAYLOAD_TELEMETRY = 0X55
 } packet_id_e;
 
 /**
@@ -130,12 +131,37 @@ typedef enum {
 } data_id_e;
 
 /**
+ * \brief Table IDs
+ */
+typedef enum {
+    TABLE_ID_OBDH                       = 0,
+    TABLE_ID_EPS                        = 1,
+    TABLE_ID_TTC_0                      = 2,
+    TABLE_ID_TTC_1                      = 3,
+    TABLE_ID_ANT                        = 4,
+    TABLE_ID_SBCD                       = 5,
+    TABLE_ID_EDC_0                      = 6,
+    TABLE_ID_EDC_1                      = 7,
+    TABLE_ID_PAYLOAD_X                  = 8,
+} table_id_e;
+
+/**
  * \brief Memory IDs
  */
 typedef enum {
     MEMORY_ID_NOR                       = 0,
     MEMORY_ID_FRAM                      = 1,
 } memory_id_e;
+
+/**
+ * \brief Feedback Error codes.
+ */
+#define ERRNO_FB_SUCESSFULL_EXEC                    (0)
+#define ERRNO_FB_MISSION_MANAGER_NOTIFY_TIMEOUT     (-1)
+#define ERRNO_FB_SUBSYSTEM_COMM_FAIL                (-2)
+#define ERRNO_FB_DEVICE_COMM_FAIL                   (-3)
+#define ERRNO_FB_FAILED_TO_UPDATE_FRAM              (-4)
+#define ERRNO_FB_FAILED_TO_SCHED_TC                 (-5)
 
 /**
  * \brief OBDH telemetry type.
@@ -212,11 +238,23 @@ typedef struct
 } cimatelite_telemetry_t;
 
 /**
+ * \brief EDC telemetry type.
+ */
+typedef struct
+{
+    sys_time_t timestamp;           /**< Timestamp of the Payload data. */
+    uint8_t id;                     /**< Payload id [Ex: CONFIG_PL_ID_EDC_1] */
+    edc_hk_t hk;                    /**< EDC Housekeeping */
+    edc_state_t state;              /**< EDC State */
+    edc_ptt_t ptt;                  /**< EDC PTT Packet */
+} edc_telemetry_t;
+
+/**
  * \brief Payloads state type.
  */
 typedef struct
 {
-    payload_telemetry_t *c_edc;     /**< Pointer to the active EDC telemetry data. */
+    edc_telemetry_t *c_edc;     /**< Pointer to the active EDC telemetry data. */
 } payload_state_t;
 
 /**
@@ -229,8 +267,8 @@ typedef struct
     ttc_telemetry_t ttc_0;          /**< TTC 0 telemetry. */
     ttc_telemetry_t ttc_1;          /**< TTC 1 telemetry. */
     antenna_telemetry_t antenna;    /**< Antenna telemetry. */
-    payload_telemetry_t edc_0;      /**< EDC 0 telemetry. */
-    payload_telemetry_t edc_1;      /**< EDC 1 telemetry. */
+    edc_telemetry_t edc_0;          /**< EDC 0 telemetry. */
+    edc_telemetry_t edc_1;          /**< EDC 1 telemetry. */
     payload_telemetry_t payload_x;  /**< Payload-X telemetry. */
     payload_state_t state;          /**< Payload state. */
     cimatelite_telemetry_t cimatelite;

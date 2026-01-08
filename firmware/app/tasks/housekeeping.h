@@ -42,7 +42,7 @@
 #include <task.h>
 
 #define TASK_HOUSEKEEPING_NAME                  "Housekeeping"      /**< Task name. */
-#define TASK_HOUSEKEEPING_STACK_SIZE            225                 /**< Stack size in bytes. */
+#define TASK_HOUSEKEEPING_STACK_SIZE            512                 /**< Stack size in bytes. */
 #define TASK_HOUSEKEEPING_PRIORITY              3                   /**< Task priority. */
 #define TASK_HOUSEKEEPING_PERIOD_MS             (60000)             /**< Task period in milliseconds. */
 #define TASK_HOUSEKEEPING_INIT_TIMEOUT_MS       5000                /**< Wait time to initialize the task in milliseconds. */

@@ -54,7 +54,7 @@
 
 /* TTC 2.0 Protocol timing */
 #define SL_TTC2_TRANSACTION_DELAY_MS            110U   /**< TTC 2.0 protocol transaction delay. */
-#define SL_TTC2_EXTRA_MUTEX_DELAY_MS            0U     /**< Delay after transaction, used to give TTC 2.0 more time to process next request. */
+#define SL_TTC2_EXTRA_MUTEX_DELAY_MS            100U     /**< Delay after transaction, used to give TTC 2.0 more time to process next request. */
 
 /* TTC 2.0 Preamble byte */
 #define SL_TTC2_PKT_PREAMBLE                    0x7EU   /**< Preamble byte value. */

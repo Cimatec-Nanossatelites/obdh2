@@ -53,7 +53,7 @@ xTaskHandle xTaskReadEDCHandle;
 
 pl_edc_hk_raw_t edc_hk_buf = {0};
 
-static void print_edc_hk(uint8_t *hk);
+static void print_edc_hk(edc_hk_t *hk);
 
 void vTaskReadEDC(void *p)
 {
@@ -72,7 +72,7 @@ void vTaskReadEDC(void *p)
     {
         payload_t pl_edc_active = (payload_t)sat_data_buf.obdh.data.main_payload_state;
 
-        payload_telemetry_t * const edc = sat_data_buf.state.c_edc;
+        edc_telemetry_t * const edc = sat_data_buf.state.c_edc;
 
         if ((pl_edc_active != PAYLOAD_NONE) && (edc != NULL))
         {
@@ -94,14 +94,18 @@ void vTaskReadEDC(void *p)
 
             vTaskDelay(pdMS_TO_TICKS(50));     /* Wait a while for the next command */
 
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_EDC_NAME, "Active EDC ID: ");
+            sys_log_print_hex((uint32_t)pl_edc_active);
+            sys_log_new_line();
+
             /* Read housekeeping data */
-            if (payload_get_data(pl_edc_active, PAYLOAD_EDC_RAW_HK, edc_hk_buf.buffer, &edc_hk_buf.length) == 0)
+            if (payload_get_data(pl_edc_active, PAYLOAD_EDC_HK, edc_hk_buf.buffer, &edc_hk_buf.length) == 0)
             {
-                (void)memcpy(edc->data, edc_hk_buf.buffer, EDC_FRAME_HK_LEN);
+                (void)memcpy(&edc->hk, edc_hk_buf.buffer, sizeof(edc_hk_t));
 
                 vTaskDelay(pdMS_TO_TICKS(50U));
 
-                print_edc_hk(edc_hk_buf.buffer);
+                print_edc_hk(&edc->hk);
             }
             else 
             {
@@ -119,24 +123,21 @@ void vTaskReadEDC(void *p)
             {
                 if (state_len >= (int32_t)sizeof(edc_state_t))
                 {
-                    (void)memcpy(&edc->data[EDC_FRAME_HK_LEN], state_arr, EDC_FRAME_STATE_LEN);
+                    (void)memcpy(&edc->state, state_arr, EDC_FRAME_STATE_LEN);
 
                     edc->timestamp = system_get_time();
 
-                    /* Cast is safe since the buffer is internally copied from a edc_state_t */
-                    edc_state_t *state = (edc_state_t*)&state_arr[0]; // cppcheck-suppress misra-c2012-11.3
-
-                    if (state->ptt_available > 0U)
+                    if (edc->state.ptt_available > 0U)
                     {
                         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_EDC_NAME, "");
-                        sys_log_print_uint(state->ptt_available);
+                        sys_log_print_uint(edc->state.ptt_available);
                         sys_log_print_msg(" PTT packet(s) available to read!");
                         sys_log_new_line();
 
                         vTaskDelay(pdMS_TO_TICKS(50U));
 
                         uint8_t i = 0;
-                        for(i = 0; i < state->ptt_available; i++)
+                        for(i = 0; i < edc->state.ptt_available; i++)
                         {
                             uint8_t ptt_arr[50] = {0};
                             int32_t ptt_len = 0;
@@ -149,22 +150,21 @@ void vTaskReadEDC(void *p)
                                     sys_log_new_line();
                                 }
 
-                                /* Cast is safe since the buffer is internally copied from a edc_ptt_t */
-                                edc_ptt_t *ptt = (edc_ptt_t*)&ptt_arr[0]; // cppcheck-suppress misra-c2012-11.3
+                                (void)memcpy(&edc->ptt, ptt_arr, sizeof(edc_ptt_t));
 
-                                int32_t ptt_power = -67 + (20 * log10(ptt->carrier_abs/32768.0));
+                                int32_t ptt_power = -67 + (20 * log10(edc->ptt.carrier_abs/32768.0));
 
                                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_EDC_NAME, "Received PTT packet:");
                                 sys_log_new_line();
                                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_EDC_NAME, "\tTime: ");
-                                sys_log_print_uint(ptt->time_tag);
+                                sys_log_print_uint(edc->ptt.time_tag);
                                 sys_log_print_msg(" sec");
                                 sys_log_new_line();
                                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_EDC_NAME, "\tError code: ");
-                                sys_log_print_uint(ptt->error_code);
+                                sys_log_print_uint(edc->ptt.error_code);
                                 sys_log_new_line();
                                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_EDC_NAME, "\tCarrier frequency: ");
-                                sys_log_print_uint(ptt->carrier_freq);
+                                sys_log_print_uint(edc->ptt.carrier_freq);
                                 sys_log_print_msg(" Hz");
                                 sys_log_new_line();
                                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_EDC_NAME, "\tReceived signal power: ");
@@ -172,7 +172,7 @@ void vTaskReadEDC(void *p)
                                 sys_log_print_msg(" dBm");
                                 sys_log_new_line();
                                 sys_log_print_event_from_module(SYS_LOG_INFO, TASK_READ_EDC_NAME, "\tUser message: ");
-                                sys_log_dump_hex(ptt->user_msg, ptt->msg_byte_length);
+                                sys_log_dump_hex(edc->ptt.user_msg, edc->ptt.msg_byte_length);
                                 sys_log_new_line();
                             }
                             else
@@ -197,30 +197,25 @@ void vTaskReadEDC(void *p)
     }
 }
 
-static void print_edc_hk(uint8_t *hk)
+static void print_edc_hk(edc_hk_t *hk)
 {
-    uint16_t curr_dig = (hk[10] << 8U) | hk[9];
-    uint16_t curr_rf = (hk[12] << 8U) | hk[11];
-    uint16_t volt = (hk[14] << 8U) | hk[13];
-    int16_t temp = (int16_t)hk[15] - 40;
-
     sys_log_print_event_from_module(SYS_LOG_INFO, "EDC Status", "Current(Dig): ");
-    sys_log_print_uint((uint32_t) curr_dig);
+    sys_log_print_uint((uint32_t) hk->current_supply_d);
     sys_log_print_msg(" mA");
     sys_log_new_line();
 
     sys_log_print_event_from_module(SYS_LOG_INFO, "EDC Status", "Current(RF): ");
-    sys_log_print_uint((uint32_t) curr_rf);
+    sys_log_print_uint((uint32_t) hk->current_supply_a);
     sys_log_print_msg(" mA");
     sys_log_new_line();
 
     sys_log_print_event_from_module(SYS_LOG_INFO, "EDC Status", "Sys Voltage: ");
-    sys_log_print_uint((uint32_t) volt);
+    sys_log_print_uint((uint32_t) hk->voltage_supply);
     sys_log_print_msg(" mV");
     sys_log_new_line();
 
     sys_log_print_event_from_module(SYS_LOG_INFO, "EDC Status", "Board Temp: ");
-    sys_log_print_int((int32_t) temp);
+    sys_log_print_int((int32_t) hk->temp);
     sys_log_print_msg(" oC");
     sys_log_new_line();
 }

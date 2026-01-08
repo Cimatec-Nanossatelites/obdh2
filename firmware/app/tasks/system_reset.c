@@ -37,6 +37,7 @@
 #include <system/sys_log/sys_log.h>
 #include <structs/satellite.h>
 
+#include "time_control.h"
 #include "system_reset.h"
 
 xTaskHandle xTaskSystemResetHandle;
@@ -45,11 +46,14 @@ void vTaskSystemReset(void *p)
 {
     (void)p;
 
-    TickType_t reset_period_ticks = pdMS_TO_TICKS_64((TickType_t) TASK_SYSTEM_RESET_PERIOD_MS);
+    const TickType_t reset_period_ticks = pdMS_TO_TICKS_64((TickType_t) TASK_SYSTEM_RESET_PERIOD_MS);
 
     while(1)
     {
         vTaskDelay(reset_period_ticks); 
+
+        /* Saving system time to FRAM before reset */
+        (void)time_control_save_sys_time(system_get_time());
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_SYSTEM_RESET_NAME, "Restarting the system...");
         sys_log_new_line();

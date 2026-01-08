@@ -47,6 +47,7 @@
 
 /* Status done bit position */
 #define TASK_STARTUP_DONE                   (1U << 0)
+#define FRAM_INIT_DONE                      (1U << 1)
 
 /**
  * \brief Startup task handle.

@@ -60,15 +60,6 @@ xTaskHandle xTaskTimeControlHandle;
 static int time_control_load_sys_time(sys_time_t *tm);
 
 /**
- * \brief Saves a given system time to the non-volatile memory.
- *
- * \param[in] tm is the system time value to save.
- *
- * \return The status/error code.
- */
-static int time_control_save_sys_time(sys_time_t tm);
-
-/**
  * \brief Computes the CRC-8 of a sequence of bytes.
  *
  * \param[in] data is an array of data to compute the CRC-8.
@@ -84,7 +75,7 @@ void vTaskTimeControl(void *p)
     (void)p;
 
     /* Wait startup task to finish */
-    (void)xEventGroupWaitBits(task_startup_status, TASK_STARTUP_DONE, pdFALSE, pdTRUE, pdMS_TO_TICKS(TASK_TIME_CONTROL_INIT_TIMEOUT_MS));
+    (void)xEventGroupWaitBits(task_startup_status, FRAM_INIT_DONE, pdFALSE, pdTRUE, pdMS_TO_TICKS(TASK_TIME_CONTROL_INIT_TIMEOUT_MS));
 
     /* Load the last saved system time */
     sys_time_t last_sys_time = 0;
@@ -168,7 +159,7 @@ static int time_control_load_sys_time(sys_time_t *tm)
     return err;
 }
 
-static int time_control_save_sys_time(sys_time_t tm)
+int time_control_save_sys_time(sys_time_t tm)
 {
     int err = 0;
 

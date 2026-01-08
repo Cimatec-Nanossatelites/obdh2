@@ -40,6 +40,7 @@
 #include <system/system.h>
 #include <system/sys_log/sys_log.h>
 #include <config/config.h>
+#include <conops/conops.h>
 #include <predict/predict.h>
 #include <predict/unsorted.h>
 #include <structs/satellite.h>
@@ -57,9 +58,6 @@ void vTaskPosDet(void *p)
     static predict_orbital_elements_t satellite;
     static struct predict_sgp4 sgp4_model;
     static struct predict_sdp4 sdp4_model;
-
-    /* Flag used to control notification sending */
-    bool sat_is_inside_brazil = false;
 
     /* Pointer used to see if TLE parsing was sucessfull */
     predict_orbital_elements_t *sat = NULL;
@@ -109,13 +107,16 @@ void vTaskPosDet(void *p)
             sys_log_print_msg(" km");
             sys_log_new_line();
 
-            bool current_position = is_satellite_in_brazil(sat_data_buf.obdh.data.position.latitude, sat_data_buf.obdh.data.position.longitude);
+            bool in_brazil = is_satellite_in_brazil(lat, lon);
 
-            if (current_position && !sat_is_inside_brazil)
+            if (in_brazil)
             {
-                sat_is_inside_brazil = true;
-
-                const event_t in_brazil_ev = { .event = EV_NOTIFY_IN_BRAZIL, .args[0] = 0U, .args[1] = 0U, .args[2] = 0U };
+                const struct conops_event in_brazil_ev = {
+                    .ev_id = EV_IN_BRAZIL,
+                    .src = 0U,
+                    .ev_name = "InBrazil",
+                    .callback = NULL,
+                };
 
                 if (notify_event_to_mission_manager(&in_brazil_ev) != 0)
                 {
@@ -123,12 +124,14 @@ void vTaskPosDet(void *p)
                     sys_log_new_line();
                 }
             }
-
-            if (!current_position && sat_is_inside_brazil)
+            else 
             {
-                sat_is_inside_brazil = false;
-
-                const event_t out_of_brazil_ev = { .event = EV_NOTIFY_OUT_OF_BRAZIL, .args[0] = 0U, .args[1] = 0U, .args[2] = 0U };
+                const struct conops_event out_of_brazil_ev = {
+                    .ev_id = EV_OUT_OF_BRAZIL,
+                    .src = 0U,
+                    .ev_name = "OutBrazil",
+                    .callback = NULL,
+                };
 
                 if (notify_event_to_mission_manager(&out_of_brazil_ev) != 0)
                 {

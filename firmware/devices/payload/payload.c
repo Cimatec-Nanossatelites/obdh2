@@ -300,7 +300,7 @@ int payload_write_cmd(payload_t pl, payload_cmd_t cmd)
     {
         case PAYLOAD_EDC_0:
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, PAYLOAD_MODULE_NAME, "EDC 0: ");
+            sys_log_print_event_from_module(SYS_LOG_INFO, PAYLOAD_MODULE_NAME, "EDC 0: ");
             sys_log_print_hex(cmd);
             sys_log_print_msg(" command received!");
             sys_log_new_line();
@@ -340,7 +340,7 @@ int payload_write_cmd(payload_t pl, payload_cmd_t cmd)
         }
         case PAYLOAD_EDC_1:
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, PAYLOAD_MODULE_NAME, "EDC 1: ");
+            sys_log_print_event_from_module(SYS_LOG_INFO, PAYLOAD_MODULE_NAME, "EDC 1: ");
             sys_log_print_hex(cmd);
             sys_log_print_msg(" command received!");
             sys_log_new_line();

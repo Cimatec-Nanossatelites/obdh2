@@ -121,7 +121,7 @@ void mem_mng_load_obdh_data_from_default_values(obdh_telemetry_t *tel)
     tel->data.initial_hib_time_count        = OBDH_PARAM_INITIAL_HIB_TIME_COUNT_DEFAULT_VAL;
     tel->data.ant_deployment_executed       = OBDH_PARAM_ANT_DEPLOYMENT_EXECUTED_DEFAULT_VAL;
     tel->data.ant_deployment_counter        = OBDH_PARAM_ANT_DEPLOYMENT_COUNTER_DEFAULT_VAL;
-    tel->data.manual_mode_on                = OBDH_PARAM_MANUAL_MODE_ON_DEFAULT_VAL;
+    tel->data.hibernation_on                = OBDH_PARAM_HIBERNATION_ON_DEFAULT_VAL;
     tel->data.main_edc                      = OBDH_PARAM_MAIN_EDC_DEFAULT_VAL;
     tel->data.general_telemetry_on          = OBDH_PARAM_GENERAL_TELEMETRY_ON_DEFAUL_VAL;
     tel->data.payload_telemetry_on          = OBDH_PARAM_PAYLOAD_TELEMETRY_ON_DEFAUL_VAL;
@@ -129,6 +129,13 @@ void mem_mng_load_obdh_data_from_default_values(obdh_telemetry_t *tel)
     tel->data.main_payload_state            = OBDH_PARAM_MAIN_PAYLOAD_STATE_DEFAULT_VAL;
     tel->data.sec_payload_state             = OBDH_PARAM_SEC_PAYLOAD_STATE_DEFAULT_VAL;
     tel->data.ts_last_contact               = OBDH_PARAM_TS_LAST_CONTACT_TIME_DEFAULT_VAL;
+    tel->data.last_tran_ev_id               = OBDH_PARAM_LAST_TRAN_EV_ID_DEFAULT_VAL;
+    tel->data.ts_commission_timeout         = OBDH_PARAM_TS_COMMISSION_TIMEOUT_DEFAULT_VAL;
+    tel->data.eps_beacon_on                 = OBDH_PARAM_EPS_BEACON_ON_DEFAULT_VAL;
+    tel->data.batt_crit_level_mv            = OBDH_PARAM_BATT_CRITICAL_LEVEL_MV_DEFAULT_VAL;
+    tel->data.manual_experiments            = OBDH_PARAM_MANUAL_EXPERIMENT_ON_DEFAUL_VAL;
+    tel->data.tc_queue_size                 = OBDH_PARAM_TC_QUEUE_SIZE_DEFAULT_VAL;
+    tel->data.ts_next_sched_tc              = OBDH_PARAM_TS_NEXT_SCHED_TC_DEFAULT_VAL;
 
     uint8_t buf[50] = OBDH_PARAM_POSITION_BIN_TLE_DEFAULT_VAL;
 
@@ -194,17 +201,26 @@ int mem_mng_load_obdh_data_from_fram(obdh_telemetry_t *tel)
 int mem_mng_write_data_to_flash_page(uint8_t *data, uint32_t *page, uint32_t page_size, uint32_t start_page, uint32_t end_page)
 {
     int err = -1;
+    (void)start_page;
+
+    if ((*page) > end_page)
+    {
+        sys_log_print_event_from_module(SYS_LOG_INFO, MEM_MNG_NAME, "Module sector will overflow! Cleaning memory to avoid corruption...");
+        sys_log_new_line();
+
+        uint8_t retry_count = 5U;
+
+        do
+        {
+            err = mem_mng_erase_flash(&sat_data_buf.obdh);
+        } while ((err < 0) && (retry_count > 0U));
+    }
 
     if (media_write(MEDIA_NOR, (*page) * page_size, data, page_size) == 0)
     {
         portENTER_CRITICAL();
 
         (*page)++;    // cppcheck-suppress misra-c2012-17.8
-
-        if (*page > end_page)
-        {
-            *page = start_page;
-        }
 
         portEXIT_CRITICAL();
 
@@ -237,7 +253,7 @@ int mem_mng_load_obdh_data_bak(obdh_telemetry_t *tel)
 {
     int err = -1;
 
-    uintptr_t base_addr = CONFIG_MEM_ADR_SYS_PARAM_BAK;
+    const uintptr_t base_addr = CONFIG_MEM_ADR_SYS_PARAM_BAK;
     uint8_t buf[BAK_DATA_SIZE + 2U];
 
     for (uint8_t i = 0U; i < BAK_DATA_SIZE + 2U; ++i)
@@ -289,6 +305,51 @@ int mem_mng_erase_flash(obdh_telemetry_t *tel)
     if (err == 0)
     {
         mem_mng_reset_page_count(&tel->data.media);
+    }
+
+    return err;
+}
+
+int mem_mng_load_tc_queue_from_fram(struct conops_cmd_queue *queue)
+{
+    int err = -1;
+
+    uint8_t sys_par[sizeof(*queue) + 1U];
+
+    if (media_read(MEDIA_FRAM, CONFIG_MEM_ADR_TC_QUEUE, sys_par, (sizeof(*queue) + 1U)) == 0)
+    {
+        if (crc_is_valid(sys_par, sizeof(*queue), sys_par[sizeof(*queue)]))
+        {
+            (void)memcpy((void*)queue, sys_par, sizeof(*queue));
+            err = 0;
+        }
+        else
+        {
+            sys_log_print_event_from_module(SYS_LOG_ERROR, MEM_MNG_NAME, "TC queue CRC wasn't valid!");
+            sys_log_new_line();
+        }
+    }
+
+    return err;
+}
+
+int mem_mng_save_tc_queue_to_fram(struct conops_cmd_queue *queue)
+{
+    int err = -1;
+
+    uint8_t buf[sizeof(*queue) + 1U];
+
+    queue->queue_lock(queue->lock);
+
+    (void)memcpy(buf, (void*)queue, sizeof(*queue));
+    
+    queue->queue_unlock(queue->lock);
+
+    buf[sizeof(*queue)] = crc8(buf, sizeof(*queue));
+
+    if (media_write(MEDIA_FRAM, CONFIG_MEM_ADR_TC_QUEUE, buf, (sizeof(*queue) + 1U)) == 0)
+    {
+        err = 0;
     }
 
     return err;

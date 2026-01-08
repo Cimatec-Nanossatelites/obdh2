@@ -34,6 +34,9 @@
  * \{
  */
 
+#include <system/system.h>
+#include <conops/conops.h>
+#include <devices/eps/eps.h>
 #include <system/sys_log/sys_log.h>
 
 #include <devices/current_sensor/current_sensor.h>
@@ -46,6 +49,7 @@
 #include "housekeeping.h"
 #include "mission_manager.h"
 #include "startup.h"
+#include "sched_tc.h"
 
 xTaskHandle xTaskHousekeepingHandle;
 
@@ -61,7 +65,7 @@ void vTaskHousekeeping(void *p)
     while(1)
     {
         /* Hibernation mode check */
-        if (sat_data_buf.obdh.data.mode == OBDH_MODE_HIBERNATION)
+        if ((sat_data_buf.obdh.data.hibernation_on) && (sat_data_buf.obdh.data.mode != OBDH_MODE_DEPLOYMENT))
         {
             uint32_t hib = sat_data_buf.obdh.data.hib_duration;
 
@@ -81,7 +85,12 @@ void vTaskHousekeeping(void *p)
 
             if (sat_data_buf.obdh.data.hib_duration == 0U)
             {
-                const event_t leave_hib = { .event = EV_NOTIFY_MODE_CHANGE_RQ, .args[0] = OBDH_WAKE_UP,  .args[1] = HOUSEKEEPING_WAKE_UP_RQ, .args[2] = 0U };
+                const struct conops_event leave_hib = {
+                    .callback = NULL,
+                    .ev_name = "WAKE-UP",
+                    .src = 0U,
+                    .ev_id = EV_HIBERNATION_TIMEOUT,
+                };
 
                 if (notify_event_to_mission_manager(&leave_hib) != 0)
                 {
@@ -91,18 +100,82 @@ void vTaskHousekeeping(void *p)
             }
         }
 
-        /* Save the last available OBDH data at every minute */
-        if (mem_mng_save_obdh_data_to_fram(&sat_data_buf.obdh) != 0)
+        vTaskDelay(pdMS_TO_TICKS(100U));
+
+        if (sat_data_buf.obdh.data.mode == OBDH_MODE_COMMISSION)
         {
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_HOUSEKEEPING_NAME, "Error writing data to the FRAM memory!");
+            if (system_get_time() >= sat_data_buf.obdh.data.ts_commission_timeout)
+            {
+                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_HOUSEKEEPING_NAME, "Commission Mode timedout! Notifying Mission Manager...");
+                sys_log_new_line();
+
+                const struct conops_event commission_timeout = {
+                    .callback = NULL,
+                    .ev_name = "COMM-TIME",
+                    .src = 0U,
+                    .ev_id = EV_COMISSION_TIMEOUT,
+                };
+
+                if (notify_event_to_mission_manager(&commission_timeout) != 0)
+                {
+                    sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_HOUSEKEEPING_NAME, "Failed to notify Commission Timeout event");
+                    sys_log_new_line();
+                }
+            }
+        }
+
+        /* Save the last available OBDH data at every minute */
+        if (mem_mng_save_obdh_data_to_fram(&sat_data_buf.obdh) == 0)
+        {
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_HOUSEKEEPING_NAME, "Saved OBDH data to FRAM!");
             sys_log_new_line();
         }
         else 
         {
-            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_HOUSEKEEPING_NAME, "Saving obdh data to fram...");
+            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_HOUSEKEEPING_NAME, "Error writing data to FRAM!");
             sys_log_new_line();
         }
-        
+
+        vTaskDelay(pdMS_TO_TICKS(50U));
+
+        uint32_t eps_beacon_state = UINT32_MAX;
+
+        if (eps_get_param(SL_EPS2_REG_BEACON_ENABLE, &eps_beacon_state) == 0)
+        {
+            if (eps_beacon_state != (uint32_t)sat_data_buf.obdh.data.eps_beacon_on)
+            {
+                int err = 0;
+                uint8_t retry_count = 5U;
+
+                do 
+                {
+                    err = eps_set_param(SL_EPS2_REG_BEACON_ENABLE, (uint32_t)sat_data_buf.obdh.data.eps_beacon_on);
+                    vTaskDelay(100U);
+                    --retry_count;
+                } while ((err < 0) && (retry_count > 0U));
+
+                if (retry_count == 0U)
+                {
+                    sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_HOUSEKEEPING_NAME, "Failed to update EPS beacon state!");
+                    sys_log_new_line();
+                }
+            }
+        }
+         
+        vTaskDelay(pdMS_TO_TICKS(50U));
+
+        /* Save the last available TC Queue at every minute */
+        if (save_sched_tc_queue_to_fram() == 0)
+        {
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_HOUSEKEEPING_NAME, "Saved TC Queue to FRAM!");
+            sys_log_new_line();
+        }
+        else 
+        {
+            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_HOUSEKEEPING_NAME, "Error saving TC Queue to FRAM!");
+            sys_log_new_line();
+        }
+
         vTaskDelayUntil(&last_cycle, pdMS_TO_TICKS(TASK_HOUSEKEEPING_PERIOD_MS));
     }
 }

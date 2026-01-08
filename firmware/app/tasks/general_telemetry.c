@@ -202,66 +202,43 @@ void vTaskGeneralTelemetry(void *p)
             gen_tel_pl.payload[72] = (sbcd_pkts_page >> 16U) & 0xFFU;
             gen_tel_pl.payload[73] = (sbcd_pkts_page >> 8U) & 0xFFU;
             gen_tel_pl.payload[74] = sbcd_pkts_page & 0xFFU;
-            gen_tel_pl.payload[75] = (sat_data_buf.obdh.data.ts_read_sensors
-                    >> 24U) & 0xFFU;
-            gen_tel_pl.payload[76] = (sat_data_buf.obdh.data.ts_read_sensors
-                    >> 16U) & 0xFFU;
-            gen_tel_pl.payload[77] = (sat_data_buf.obdh.data.ts_read_sensors
-                    >> 8U) & 0xFFU;
-            gen_tel_pl.payload[78] = sat_data_buf.obdh.data.ts_read_sensors
-                    & 0xFFU;
-            gen_tel_pl.payload[79] = (sat_data_buf.obdh.data.position.timestamp
-                    >> 24U) & 0xFFU;
-            gen_tel_pl.payload[80] = (sat_data_buf.obdh.data.position.timestamp
-                    >> 16U) & 0xFFU;
-            gen_tel_pl.payload[81] = (sat_data_buf.obdh.data.position.timestamp
-                    >> 8U) & 0xFFU;
-            gen_tel_pl.payload[82] = sat_data_buf.obdh.data.position.timestamp
-                    & 0xFFU;
-            gen_tel_pl.payload[83] =
-                    ((uint16_t) sat_data_buf.obdh.data.position.latitude >> 8U)
-                            & 0xFFU;
-            gen_tel_pl.payload[84] = sat_data_buf.obdh.data.position.latitude
-                    & 0xFF;
-            gen_tel_pl.payload[85] =
-                    ((uint16_t) sat_data_buf.obdh.data.position.longitude >> 8U)
-                            & 0xFFU;
-            gen_tel_pl.payload[86] = sat_data_buf.obdh.data.position.longitude
-                    & 0xFF;
-            gen_tel_pl.payload[87] =
-                    ((uint16_t) sat_data_buf.obdh.data.position.altitude >> 8U)
-                            & 0xFFU;
-            gen_tel_pl.payload[88] = sat_data_buf.obdh.data.position.altitude
-                    & 0xFF;
-            gen_tel_pl.payload[89] =
-                    (sat_data_buf.obdh.data.position.ts_last_tle_update >> 24U)
-                            & 0xFFU;
-            gen_tel_pl.payload[90] =
-                    (sat_data_buf.obdh.data.position.ts_last_tle_update >> 16U)
-                            & 0xFFU;
-            gen_tel_pl.payload[91] =
-                    (sat_data_buf.obdh.data.position.ts_last_tle_update >> 8U)
-                            & 0xFFU;
-            gen_tel_pl.payload[92] =
-                    sat_data_buf.obdh.data.position.ts_last_tle_update & 0xFFU;
-            gen_tel_pl.payload[93] = (sat_data_buf.obdh.data.ts_last_contact
-                    >> 24U) & 0xFFU;
-            gen_tel_pl.payload[94] = (sat_data_buf.obdh.data.ts_last_contact
-                    >> 16U) & 0xFFU;
-            gen_tel_pl.payload[95] = (sat_data_buf.obdh.data.ts_last_contact
-                    >> 8U) & 0xFFU;
-            gen_tel_pl.payload[96] = sat_data_buf.obdh.data.ts_last_contact
-                    & 0xFFU;
+            gen_tel_pl.payload[75] = (sat_data_buf.obdh.data.ts_read_sensors >> 24U) & 0xFFU;
+            gen_tel_pl.payload[76] = (sat_data_buf.obdh.data.ts_read_sensors >> 16U) & 0xFFU;
+            gen_tel_pl.payload[77] = (sat_data_buf.obdh.data.ts_read_sensors >> 8U) & 0xFFU;
+            gen_tel_pl.payload[78] = sat_data_buf.obdh.data.ts_read_sensors & 0xFFU;
+            gen_tel_pl.payload[79] = (sat_data_buf.obdh.data.position.timestamp >> 24U) & 0xFFU;
+            gen_tel_pl.payload[80] = (sat_data_buf.obdh.data.position.timestamp >> 16U) & 0xFFU;
+            gen_tel_pl.payload[81] = (sat_data_buf.obdh.data.position.timestamp >> 8U) & 0xFFU;
+            gen_tel_pl.payload[82] = sat_data_buf.obdh.data.position.timestamp & 0xFFU;
+            gen_tel_pl.payload[83] = ((uint16_t)sat_data_buf.obdh.data.position.latitude >> 8U) & 0xFFU;
+            gen_tel_pl.payload[84] = sat_data_buf.obdh.data.position.latitude & 0xFF;
+            gen_tel_pl.payload[85] = ((uint16_t)sat_data_buf.obdh.data.position.longitude >> 8U) & 0xFFU;
+            gen_tel_pl.payload[86] = sat_data_buf.obdh.data.position.longitude & 0xFF;
+            gen_tel_pl.payload[87] = ((uint16_t)sat_data_buf.obdh.data.position.altitude >> 8U) & 0xFFU;
+            gen_tel_pl.payload[88] = sat_data_buf.obdh.data.position.altitude & 0xFF;
+            gen_tel_pl.payload[89] = (sat_data_buf.obdh.data.position.ts_last_tle_update >> 24U) & 0xFFU;
+            gen_tel_pl.payload[90] = (sat_data_buf.obdh.data.position.ts_last_tle_update >> 16U) & 0xFFU;
+            gen_tel_pl.payload[91] = (sat_data_buf.obdh.data.position.ts_last_tle_update >> 8U) & 0xFFU;
+            gen_tel_pl.payload[92] = sat_data_buf.obdh.data.position.ts_last_tle_update & 0xFFU;
+            gen_tel_pl.payload[93] = (sat_data_buf.obdh.data.ts_last_contact >> 24U) & 0xFFU;
+            gen_tel_pl.payload[94] = (sat_data_buf.obdh.data.ts_last_contact >> 16U) & 0xFFU;
+            gen_tel_pl.payload[95] = (sat_data_buf.obdh.data.ts_last_contact >> 8U) & 0xFFU;
+            gen_tel_pl.payload[96] = sat_data_buf.obdh.data.ts_last_contact & 0xFFU;
+            gen_tel_pl.payload[97] = (sat_data_buf.obdh.data.ts_next_sched_tc >> 24U) & 0xFFU;
+            gen_tel_pl.payload[98] = (sat_data_buf.obdh.data.ts_next_sched_tc >> 16U) & 0xFFU;
+            gen_tel_pl.payload[99] = (sat_data_buf.obdh.data.ts_next_sched_tc >> 8U) & 0xFFU;
+            gen_tel_pl.payload[100] = sat_data_buf.obdh.data.ts_next_sched_tc & 0xFFU;
+            gen_tel_pl.payload[101] = sat_data_buf.obdh.data.tc_queue_size;
+            gen_tel_pl.payload[102] = sat_data_buf.obdh.data.mode;
 
-            gen_tel_pl.length = 97U;
+            gen_tel_pl.length = 103U;
 
             uint8_t gen_tel_pl_raw[120] = { 0 };
             uint16_t gen_tel_pl_raw_len = 0;
 
             fsat_pkt_encode(&gen_tel_pl, gen_tel_pl_raw, &gen_tel_pl_raw_len);
 
-            if ((sat_data_buf.obdh.data.mode != OBDH_MODE_HIBERNATION)
-                    && (sat_data_buf.obdh.data.general_telemetry_on))
+            if ((!sat_data_buf.obdh.data.hibernation_on) && (sat_data_buf.obdh.data.general_telemetry_on))
             {
                 if (ttc_send(TTC_1, gen_tel_pl_raw, gen_tel_pl_raw_len) != 0)
                 {
