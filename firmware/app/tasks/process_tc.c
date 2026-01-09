@@ -1052,7 +1052,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
                             fsat_pkt_encode(&data_req_ans_pkt, data_req_ans_raw,
                                             &data_req_ans_raw_len);
 
-                            if (sat_data_buf.obdh.data.mode != OBDH_MODE_HIBERNATION)
+                            if (!sat_data_buf.obdh.data.hibernation_on)
                             {
                                 if (ttc_send(TTC_1, data_req_ans_raw,
                                              data_req_ans_raw_len) != 0)
@@ -1337,7 +1337,7 @@ static void process_tc_activate_module(uint8_t *pkt, uint16_t pkt_len, bool is_s
 
                 /* Enable periodic payload telemetry */
                 sat_data_buf.obdh.data.payload_telemetry_on = true;
-                (void)send_tc_feedback(pkt);
+                (void)send_tc_feedback(pkt,ERRNO_FB_SUCESSFULL_EXEC);
 
                 break;
             }
@@ -2617,7 +2617,7 @@ static void process_tc_get_payload_count(uint8_t *pkt, uint16_t pkt_len)
 
         fsat_pkt_encode(&pkt_broacast, raw_pkt, &raw_pkt_len);
 
-        if (sat_data_buf.obdh.data.mode != OBDH_MODE_HIBERNATION)
+        if (!sat_data_buf.obdh.data.hibernation_on)
         {
             if (ttc_send(TTC_1, raw_pkt, raw_pkt_len) != 0)
             {
@@ -2707,7 +2707,7 @@ static void process_tc_clear_cimatelite_data(uint8_t *pkt, uint16_t pkt_len)
                 sys_log_new_line();
                 sat_data_buf.obdh.data.media.last_page_cimatelite_data =
                     OBDH_PARAM_MEDIA_LAST_CIMATELITE_DEFAULT_VAL;
-                (void)send_tc_feedback(pkt);
+                (void)send_tc_feedback(pkt, ERRNO_FB_SUCESSFULL_EXEC);
             }
         }
         else

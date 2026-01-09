@@ -189,7 +189,7 @@ void vTaskPayloadTelemetry(void *p)
                 fsat_pkt_encode(&gen_tel_pl, gen_tel_pl_raw,
                                 &gen_tel_pl_raw_len);
 
-                if ((sat_data_buf.obdh.data.mode != OBDH_MODE_HIBERNATION)
+                if ((!sat_data_buf.obdh.data.hibernation_on)
                         && (sat_data_buf.obdh.data.payload_telemetry_on))
                 {
                     if (ttc_send(TTC_1, gen_tel_pl_raw, gen_tel_pl_raw_len)
