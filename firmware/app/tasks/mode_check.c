@@ -286,13 +286,6 @@ void vTaskHealthCheckMode(void *p)
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_HEALTH_CHECK_MODE_NAME, "Testing Stand-by Mode transition from Experiment...");
             sys_log_new_line();
 
-            const struct conops_event exp_timeout = {
-                .src = 10U,
-                .ev_id = EV_PX_FINISHED,
-                .ev_name = "EXP_TIME",
-                .callback = NULL,
-            };
-
             if (notify_event_to_mission_manager(&exp_timeout) != 0)
             {
                 sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_HEALTH_CHECK_MODE_NAME, "Failed to enqueue `Px finished` event");

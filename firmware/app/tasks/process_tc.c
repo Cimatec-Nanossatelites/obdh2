@@ -1514,7 +1514,7 @@ static void process_tc_activate_payload(uint8_t *pkt, uint16_t pkt_len, bool is_
                 /* Update last valid tc parameter */
                 sat_data_buf.obdh.data.last_valid_tc = pkt[0];
                 sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-                pl_event.ev_id = EV_TC_ENABLE_PAYLOAD;
+                // pl_event.ev_id = EV_TC_ENABLE_PAYLOAD; // Evento a ser retirado pois não será utilizado no CIMATÉLITE
                 pl_event.src = (uint16_t)PL_ID_EDC_1;
                 (void)notify_event_to_mission_manager(&pl_event);
             }
@@ -1527,39 +1527,7 @@ static void process_tc_activate_payload(uint8_t *pkt, uint16_t pkt_len, bool is_
 
             break;
         }
-        case PL_ID_EDC_2:
-        {
-            if (!is_scheduled)
-            {
-                uint8_t tc_key[16] = CONFIG_TC_KEY_ACTIVATE_PAYLOAD_EDC; // cppcheck-suppress misra-c2012-7.4
-
-                if (process_tc_validate_hmac(pkt, 1U + 7U + 1U, &pkt[9], 20U, tc_key, sizeof(CONFIG_TC_KEY_ACTIVATE_PAYLOAD_EDC) - 1U))
-                {
-                    authed = true;
-                }
-            }
-
-            if ((authed) || (is_scheduled))
-            {
-                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Activating the EDC 2 payload...");
-                sys_log_new_line();
-
-                /* Update last valid tc parameter */
-                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
-                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-                pl_event.ev_id = EV_TC_ENABLE_PAYLOAD;
-                pl_event.src = (uint16_t)PL_ID_EDC_2;
-                (void)notify_event_to_mission_manager(&pl_event);
-            }
-            else
-            {
-                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error activating the EDC 2 payload! Invalid key!");
-                sys_log_new_line();
-                err = -1;
-            }
-
-            break;
-        }
+        
         case PL_ID_PAYLOAD_X:
         {
             if (!is_scheduled)
@@ -1580,7 +1548,7 @@ static void process_tc_activate_payload(uint8_t *pkt, uint16_t pkt_len, bool is_
                 /* Update last valid tc parameter */
                 sat_data_buf.obdh.data.last_valid_tc = pkt[0];
                 sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-                pl_event.ev_id = EV_TC_ENABLE_PAYLOAD;
+                // pl_event.ev_id = EV_TC_ENABLE_PAYLOAD; // Evento a ser retirado pois não será utilizado no CIMATÉLITE
                 pl_event.src = (uint16_t)PL_ID_PAYLOAD_X;
                 (void)notify_event_to_mission_manager(&pl_event);
             }
