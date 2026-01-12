@@ -38,7 +38,8 @@
 #define CONFIG_H_
 
 /* Mission Defines */
-#define CONFIG_MISSION_GOLDS_UFSC                       1
+#define CONFIG_MISSION_GOLDS_UFSC                       0
+#define CONFIG_MISSION_CIMATELITE                       1
 
 /* Tasks */
 #define CONFIG_TASK_STARTUP_ENABLED                     1
