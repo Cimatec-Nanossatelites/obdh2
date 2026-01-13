@@ -74,18 +74,18 @@ int8_t obdh_set_param(uint8_t param_id, uint32_t *buf)
                 case OBDH_MODE_STAND_BY:
                     mode = EV_TC_GOTO_STAND_BY_MODE;
                     break;
-                case OBDH_MODE_EXPERIMENT:
-                    mode = EV_TC_GOTO_EXPERIMENT_MODE;
-                    break;
+//                case OBDH_MODE_EXPERIMENT:
+//                    mode = EV_TC_GOTO_EXPERIMENT_MODE;
+//                    break;
                 case OBDH_MODE_FDIR:
                     mode = EV_TC_GOTO_FDIR_MODE;
                     break;
-                case OBDH_MODE_MANUAL:
-                    mode = EV_TC_GOTO_MANUAL_MODE;
-                    break;
-                case OBDH_MODE_COMMISSION:
-                    mode = EV_TC_GOTO_COMMISSION_MODE;
-                    break;
+//                case OBDH_MODE_MANUAL:
+//                    mode = EV_TC_GOTO_MANUAL_MODE;
+//                    break;
+//                case OBDH_MODE_COMMISSION:
+//                    mode = EV_TC_GOTO_COMMISSION_MODE;
+//                    break;
                 default:
                     break;
             }
@@ -179,86 +179,86 @@ int8_t obdh_set_param(uint8_t param_id, uint32_t *buf)
 
             break;
         }
-        case OBDH_PARAM_ID_MAIN_PAYLOAD_STATE:
-        {
-            if ((*buf == PL_ID_EDC_1) || (*buf == PL_ID_EDC_2))
-            {
-                const struct conops_event payload_activate = {
-                    .ev_id = EV_TC_ENABLE_PAYLOAD,
-                    .src = (uint16_t)*buf,
-                    .callback = NULL,
-                    .ev_name = "MAIN_PL",
-                };
-
-                if (notify_event_to_mission_manager(&payload_activate) != 0)
-                {
-                    sys_log_print_event_from_module(SYS_LOG_ERROR, OBDH_DATA_LOG_NAME, "Failed to notify payload activation to Mission Manager!");
-                    sys_log_new_line();
-                    err = -1;
-                }
-            }
-            else if (*buf == 0U)
-            {
-                const struct conops_event payload_deactivate = {
-                    .ev_id = EV_TC_DISABLE_PAYLOAD,
-                    .src = sat_data_buf.obdh.data.main_payload_state,
-                    .callback = NULL,
-                    .ev_name = "MAIN_PL",
-                };
-
-                if (notify_event_to_mission_manager(&payload_deactivate) != 0)
-                {
-                    sys_log_print_event_from_module(SYS_LOG_ERROR, OBDH_DATA_LOG_NAME, "Failed to notify payload deactivation to Mission Manager!");
-                    sys_log_new_line();
-                    err = -1;
-                }
-            }
-            else
-            {
-                err = -1;
-            }
-            break;
-        }
-        case OBDH_PARAM_ID_SEC_PAYLOAD_STATE:
-        {
-            if (*buf == PL_ID_PAYLOAD_X)
-            {
-                const struct conops_event payload_activate = {
-                    .ev_id = EV_TC_ENABLE_PAYLOAD,
-                    .src = (uint16_t)*buf,
-                    .callback = NULL,
-                    .ev_name = "SEC_PL",
-                };
-
-                if (notify_event_to_mission_manager(&payload_activate) != 0)
-                {
-                    sys_log_print_event_from_module(SYS_LOG_ERROR, OBDH_DATA_LOG_NAME, "Failed to notify payload activation to Mission Manager!");
-                    sys_log_new_line();
-                    err = -1;
-                }
-            }
-            else if (*buf == 0U)
-            {
-                const struct conops_event payload_deactivate = {
-                    .ev_id = EV_TC_DISABLE_PAYLOAD,
-                    .src = (uint16_t)PAYLOAD_X,
-                    .callback = NULL,
-                    .ev_name = "SEC_PL",
-                };
-
-                if (notify_event_to_mission_manager(&payload_deactivate) != 0)
-                {
-                    sys_log_print_event_from_module(SYS_LOG_ERROR, OBDH_DATA_LOG_NAME, "Failed to notify payload deactivation to Mission Manager!");
-                    sys_log_new_line();
-                    err = -1;
-                }
-            }
-            else
-            {
-                err = -1;
-            }
-            break;
-        }
+//        case OBDH_PARAM_ID_MAIN_PAYLOAD_STATE:
+//        {
+//            if ((*buf == PL_ID_EDC_1) || (*buf == PL_ID_EDC_2))
+//            {
+//                const struct conops_event payload_activate = {
+//                    .ev_id = EV_TC_ENABLE_PAYLOAD,
+//                    .src = (uint16_t)*buf,
+//                    .callback = NULL,
+//                    .ev_name = "MAIN_PL",
+//                };
+//
+//                if (notify_event_to_mission_manager(&payload_activate) != 0)
+//                {
+//                    sys_log_print_event_from_module(SYS_LOG_ERROR, OBDH_DATA_LOG_NAME, "Failed to notify payload activation to Mission Manager!");
+//                    sys_log_new_line();
+//                    err = -1;
+//                }
+//            }
+//            else if (*buf == 0U)
+//            {
+//                const struct conops_event payload_deactivate = {
+//                    .ev_id = EV_TC_DISABLE_PAYLOAD,
+//                    .src = sat_data_buf.obdh.data.main_payload_state,
+//                    .callback = NULL,
+//                    .ev_name = "MAIN_PL",
+//                };
+//
+//                if (notify_event_to_mission_manager(&payload_deactivate) != 0)
+//                {
+//                    sys_log_print_event_from_module(SYS_LOG_ERROR, OBDH_DATA_LOG_NAME, "Failed to notify payload deactivation to Mission Manager!");
+//                    sys_log_new_line();
+//                    err = -1;
+//                }
+//            }
+//            else
+//            {
+//                err = -1;
+//            }
+//            break;
+//        }
+//        case OBDH_PARAM_ID_SEC_PAYLOAD_STATE:
+//        {
+//            if (*buf == PL_ID_PAYLOAD_X)
+//            {
+//                const struct conops_event payload_activate = {
+//                    .ev_id = EV_TC_ENABLE_PAYLOAD,
+//                    .src = (uint16_t)*buf,
+//                    .callback = NULL,
+//                    .ev_name = "SEC_PL",
+//                };
+//
+//                if (notify_event_to_mission_manager(&payload_activate) != 0)
+//                {
+//                    sys_log_print_event_from_module(SYS_LOG_ERROR, OBDH_DATA_LOG_NAME, "Failed to notify payload activation to Mission Manager!");
+//                    sys_log_new_line();
+//                    err = -1;
+//                }
+//            }
+//            else if (*buf == 0U)
+//            {
+//                const struct conops_event payload_deactivate = {
+//                    .ev_id = EV_TC_DISABLE_PAYLOAD,
+//                    .src = (uint16_t)PAYLOAD_X,
+//                    .callback = NULL,
+//                    .ev_name = "SEC_PL",
+//                };
+//
+//                if (notify_event_to_mission_manager(&payload_deactivate) != 0)
+//                {
+//                    sys_log_print_event_from_module(SYS_LOG_ERROR, OBDH_DATA_LOG_NAME, "Failed to notify payload deactivation to Mission Manager!");
+//                    sys_log_new_line();
+//                    err = -1;
+//                }
+//            }
+//            else
+//            {
+//                err = -1;
+//            }
+//            break;
+//        }
         case OBDH_PARAM_ID_HIB_DURATION:
         {
             taskENTER_CRITICAL();
