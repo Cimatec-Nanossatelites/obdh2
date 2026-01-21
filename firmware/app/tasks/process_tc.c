@@ -1611,24 +1611,24 @@ static void process_tc_deactivate_payload(uint8_t *pkt, uint16_t pkt_len, bool i
                 }
             }
 
-            if ((authed) || (is_scheduled))
-            {
-                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Deactivating the EDC 1 payload...");
-                sys_log_new_line();
-
-                /* Update last valid tc parameter */
-                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
-                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-                pl_event.ev_id = EV_TC_DISABLE_PAYLOAD;
-                pl_event.src = (uint16_t)PL_ID_EDC_1;
-                (void)notify_event_to_mission_manager(&pl_event);
-            }
-            else
-            {
-                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error deactivating the EDC 1 payload! Invalid key!");
-                sys_log_new_line();
-                err = -1;
-            }
+//            if ((authed) || (is_scheduled))
+//            {
+//                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Deactivating the EDC 1 payload...");
+//                sys_log_new_line();
+//
+//                /* Update last valid tc parameter */
+//                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
+//                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
+//                pl_event.ev_id = EV_TC_DISABLE_PAYLOAD;
+//                pl_event.src = (uint16_t)PL_ID_EDC_1;
+//                (void)notify_event_to_mission_manager(&pl_event);
+//            }
+//            else
+//            {
+//                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error deactivating the EDC 1 payload! Invalid key!");
+//                sys_log_new_line();
+//                err = -1;
+//            }
 
             break;
         }
@@ -1644,24 +1644,24 @@ static void process_tc_deactivate_payload(uint8_t *pkt, uint16_t pkt_len, bool i
                 }
             }
 
-            if ((authed) || (is_scheduled))
-            {
-                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Deactivating the EDC 2 payload...");
-                sys_log_new_line();
-
-                /* Update last valid tc parameter */
-                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
-                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-                pl_event.ev_id = EV_TC_DISABLE_PAYLOAD;
-                pl_event.src = (uint16_t)PL_ID_EDC_2;
-                (void)notify_event_to_mission_manager(&pl_event);
-            }
-            else
-            {
-                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error deactivating the EDC 2 payload! Invalid key!");
-                sys_log_new_line();
-                err = -1;
-            }
+//            if ((authed) || (is_scheduled))
+//            {
+//                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Deactivating the EDC 2 payload...");
+//                sys_log_new_line();
+//
+//                /* Update last valid tc parameter */
+//                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
+//                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
+//                pl_event.ev_id = EV_TC_DISABLE_PAYLOAD;
+//                pl_event.src = (uint16_t)PL_ID_EDC_2;
+//                (void)notify_event_to_mission_manager(&pl_event);
+//            }
+//            else
+//            {
+//                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error deactivating the EDC 2 payload! Invalid key!");
+//                sys_log_new_line();
+//                err = -1;
+//            }
 
             break;
         }
@@ -1677,24 +1677,24 @@ static void process_tc_deactivate_payload(uint8_t *pkt, uint16_t pkt_len, bool i
                 }
             }
 
-            if ((authed) || (is_scheduled))
-            {
-                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Deactivating the Payload-X payload...");
-                sys_log_new_line();
-
-                /* Update last valid tc parameter */
-                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
-                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-                pl_event.ev_id = EV_TC_DISABLE_PAYLOAD;
-                pl_event.src = (uint16_t)PL_ID_PAYLOAD_X;
-                (void)notify_event_to_mission_manager(&pl_event);
-            }
-            else
-            {
-                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error deactivating the Payload-X payload! Invalid key!");
-                sys_log_new_line();
-                err = -1;
-            }
+//            if ((authed) || (is_scheduled))
+//            {
+//                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Deactivating the Payload-X payload...");
+//                sys_log_new_line();
+//
+//                /* Update last valid tc parameter */
+//                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
+//                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
+//                pl_event.ev_id = EV_TC_DISABLE_PAYLOAD;
+//                pl_event.src = (uint16_t)PL_ID_PAYLOAD_X;
+//                (void)notify_event_to_mission_manager(&pl_event);
+//            }
+//            else
+//            {
+//                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error deactivating the Payload-X payload! Invalid key!");
+//                sys_log_new_line();
+//                err = -1;
+//            }
 
             break;
         }

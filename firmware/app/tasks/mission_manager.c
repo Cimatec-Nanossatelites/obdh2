@@ -304,7 +304,7 @@ static int goto_nominal_mode(struct conops_fsm *ctx,
 
     if ((ev->ev_id != EV_PERSIST_STATE_ON_INIT) && (retval == 0))
     {
-        sattelite_change_mode(OBDH_MODE_NORMAL);
+        satellite_change_mode(OBDH_MODE_NORMAL);
         sat->obdh.data.last_tran_ev_id = ev->ev_id;
         ctx->state = OBDH_MODE_NORMAL;
     }

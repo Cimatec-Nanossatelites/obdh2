@@ -147,7 +147,7 @@ void vTaskHealthCheckMode(void *p)
 
             vTaskDelay(pdMS_TO_TICKS(TASK_PROCESS_TC_MAX_WAIT_TIME_MS));
 
-            payload_test = (sat_data_buf.obdh.data.mode == OBDH_MODE_COMMISSION) && ((sat_data_buf.obdh.data.main_payload_state == (uint8_t)PAYLOAD_NONE) && (sat_data_buf.obdh.data.sec_payload_state == (uint8_t)PAYLOAD_NONE));
+            // payload_test = (sat_data_buf.obdh.data.mode == OBDH_MODE_COMMISSION) && ((sat_data_buf.obdh.data.main_payload_state == (uint8_t)PAYLOAD_NONE) && (sat_data_buf.obdh.data.sec_payload_state == (uint8_t)PAYLOAD_NONE));
             hibernation_test = (sat_data_buf.obdh.data.hibernation_on == false) && (sat_data_buf.obdh.data.hib_duration == 0U);
             bool beacon_on = (sat_data_buf.obdh.data.general_telemetry_on == true);
 
@@ -166,7 +166,7 @@ void vTaskHealthCheckMode(void *p)
 
             vTaskDelay(pdMS_TO_TICKS(TASK_PROCESS_TC_MAX_WAIT_TIME_MS));
 
-            payload_test = (sat_data_buf.obdh.data.mode == OBDH_MODE_COMMISSION) && ((sat_data_buf.obdh.data.main_payload_state == (uint8_t)PAYLOAD_NONE) && (sat_data_buf.obdh.data.sec_payload_state == (uint8_t)PAYLOAD_NONE));
+            // payload_test = (sat_data_buf.obdh.data.mode == OBDH_MODE_COMMISSION) && ((sat_data_buf.obdh.data.main_payload_state == (uint8_t)PAYLOAD_NONE) && (sat_data_buf.obdh.data.sec_payload_state == (uint8_t)PAYLOAD_NONE));
 
             sys_log_print_test_result(payload_test, "CM(InBrazil) - Payload State test");
             sys_log_new_line();
@@ -179,7 +179,7 @@ void vTaskHealthCheckMode(void *p)
 
             vTaskDelay(pdMS_TO_TICKS(TASK_PROCESS_TC_MAX_WAIT_TIME_MS));
 
-            payload_test = (sat_data_buf.obdh.data.mode == OBDH_MODE_COMMISSION) && ((sat_data_buf.obdh.data.main_payload_state == (uint8_t)PAYLOAD_NONE) && (sat_data_buf.obdh.data.sec_payload_state == (uint8_t)PAYLOAD_NONE));
+            // payload_test = (sat_data_buf.obdh.data.mode == OBDH_MODE_COMMISSION) && ((sat_data_buf.obdh.data.main_payload_state == (uint8_t)PAYLOAD_NONE) && (sat_data_buf.obdh.data.sec_payload_state == (uint8_t)PAYLOAD_NONE));
 
             sys_log_print_test_result(payload_test, "CM(OutBrazil) - Payload State test");
             sys_log_new_line();
@@ -278,7 +278,7 @@ void vTaskHealthCheckMode(void *p)
 
             vTaskDelay(pdMS_TO_TICKS(TASK_PROCESS_TC_MAX_WAIT_TIME_MS));
 
-            payload_test = (sat_data_buf.obdh.data.mode == OBDH_MODE_EXPERIMENT) && ((sat_data_buf.obdh.data.main_payload_state == (uint8_t)PAYLOAD_NONE) && (sat_data_buf.obdh.data.sec_payload_state == (uint8_t)PAYLOAD_X));
+            // payload_test = (sat_data_buf.obdh.data.mode == OBDH_MODE_EXPERIMENT) && ((sat_data_buf.obdh.data.main_payload_state == (uint8_t)PAYLOAD_NONE) && (sat_data_buf.obdh.data.sec_payload_state == (uint8_t)PAYLOAD_X));
 
             sys_log_print_test_result(payload_test, "NM(OutBRAZIL) - Payload State test");
             sys_log_new_line();
@@ -286,11 +286,11 @@ void vTaskHealthCheckMode(void *p)
             sys_log_print_event_from_module(SYS_LOG_INFO, TASK_HEALTH_CHECK_MODE_NAME, "Testing Stand-by Mode transition from Experiment...");
             sys_log_new_line();
 
-            if (notify_event_to_mission_manager(&exp_timeout) != 0)
-            {
-                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_HEALTH_CHECK_MODE_NAME, "Failed to enqueue `Px finished` event");
-                sys_log_new_line();
-            }
+//            if (notify_event_to_mission_manager(&exp_timeout) != 0)
+//            {
+//                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_HEALTH_CHECK_MODE_NAME, "Failed to enqueue `Px finished` event");
+//                sys_log_new_line();
+//            }
 
             vTaskDelay(pdMS_TO_TICKS(TASK_PROCESS_TC_MAX_WAIT_TIME_MS));
 

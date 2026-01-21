@@ -112,18 +112,18 @@ void vTaskReadPX(void *p)
                 vTaskDelayUntil(&last_cycle, pdMS_TO_TICKS(TASK_READ_PX_PERIOD_MS));
             }
 
-            const struct conops_event px_end = {
-                .ev_id = EV_PX_FINISHED,
-                .ev_name = "EXP-END",
-                .callback = NULL,
-                .src = 0U,
-            };
+//            const struct conops_event px_end = {
+//                .ev_id = EV_PX_FINISHED,
+//                .ev_name = "EXP-END",
+//                .callback = NULL,
+//                .src = 0U,
+//            };
 
-            if (notify_event_to_mission_manager(&px_end) != 0)
-            {
-                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_PX_NAME, "Failed to notify event!");
-                sys_log_new_line();
-            }
+//            if (notify_event_to_mission_manager(&px_end) != 0)
+//            {
+//                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_READ_PX_NAME, "Failed to notify event!");
+//                sys_log_new_line();
+//            }
         }
     }
 }
