@@ -193,38 +193,6 @@ static void process_tc_activate_module(uint8_t *pkt, uint16_t pkt_len, bool is_s
 static void process_tc_deactivate_module(uint8_t *pkt, uint16_t pkt_len, bool is_scheduled);
 
 /**
- * \brief Activate payload telecommand.
- *
- * \param[in] pkt is the packet to process.
- *
- * \param[in] pkt_len is the number of bytes of the given packet.
- *
- * \param[in] is_scheduled is a flag to mark if a telecommand packet
- * was scheduled instead of just received. This is needed because in a
- * scheduled TC there is no need to authenticate it, since it was
- * authenticated on queue insertion.
- *
- * \return None.
- */
-static void process_tc_activate_payload(uint8_t *pkt, uint16_t pkt_len, bool is_scheduled);
-
-/**
- * \brief Deactivate payload telecommand.
- *
- * \param[in] pkt is the packet to process.
- *
- * \param[in] pkt_len is the number of bytes of the given packet.
- *
- * \param[in] is_scheduled is a flag to mark if a telecommand packet
- * was scheduled instead of just received. This is needed because in a
- * scheduled TC there is no need to authenticate it, since it was
- * authenticated on queue insertion.
- *
- * \return None.
- */
-static void process_tc_deactivate_payload(uint8_t *pkt, uint16_t pkt_len, bool is_scheduled);
-
-/**
  * \brief Erase memory telecommand.
  *
  * \param[in] pkt is the packet to process.
@@ -468,20 +436,6 @@ int execute_tc(uint8_t *pkt, uint8_t pkt_len, bool is_scheduled)
         process_tc_deactivate_module(pkt, pkt_len, is_scheduled);
 
         break;
-    case PKT_ID_UPLINK_ACTIVATE_PAYLOAD:
-        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Executing the TC \"Activate Payload\"...");
-        sys_log_new_line();
-
-        process_tc_activate_payload(pkt, pkt_len, is_scheduled);
-
-        break;
-    case PKT_ID_UPLINK_DEACTIVATE_PAYLOAD:
-        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Executing the TC \"Deactivate Payload\"...");
-        sys_log_new_line();
-
-        process_tc_deactivate_payload(pkt, pkt_len, is_scheduled);
-
-        break;
     case PKT_ID_UPLINK_ERASE_MEMORY:
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Executing the TC \"Erase Memory\"...");
         sys_log_new_line();
@@ -604,7 +558,7 @@ void vTaskProcessTC(void *p)
     {
         TickType_t last_cycle = xTaskGetTickCount();
 
-        int pkts = ttc_avail(TTC_1);
+        int pkts = ttc_avail(TTC_0);
 
         if (pkts > 0)
         {
@@ -616,7 +570,7 @@ void vTaskProcessTC(void *p)
             uint8_t pkt[300] = {0};
             uint16_t pkt_len = 0;
 
-            if (ttc_recv(TTC_1, pkt, &pkt_len) == 0)
+            if (ttc_recv(TTC_0, pkt, &pkt_len) == 0)
             {
                 if (execute_tc(pkt, pkt_len, false) != 0)
                 {
@@ -737,7 +691,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
 
                             if (!sat_data_buf.obdh.data.hibernation_on)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw, data_req_ans_raw_len) != 0)
+                                if (ttc_send(TTC_1, data_req_ans_raw, data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting the OBDH data log of memory page ");
                                     sys_log_print_uint(i);
@@ -781,7 +735,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
 
                             if (!sat_data_buf.obdh.data.hibernation_on)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw, data_req_ans_raw_len) != 0)
+                                if (ttc_send(TTC_1, data_req_ans_raw, data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting the EPS data log of memory page ");
                                     sys_log_print_uint(i);
@@ -825,7 +779,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
 
                             if (!sat_data_buf.obdh.data.hibernation_on)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw, data_req_ans_raw_len) != 0)
+                                if (ttc_send(TTC_1, data_req_ans_raw, data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting the TTC 0 data log of memory page ");
                                     sys_log_print_uint(i);
@@ -869,7 +823,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
 
                             if (!sat_data_buf.obdh.data.hibernation_on)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw, data_req_ans_raw_len) != 0)
+                                if (ttc_send(TTC_1, data_req_ans_raw, data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting the TTC 1 data log of memory page ");
                                     sys_log_print_uint(i);
@@ -913,7 +867,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
 
                             if (!sat_data_buf.obdh.data.hibernation_on)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw, data_req_ans_raw_len) != 0)
+                                if (ttc_send(TTC_1, data_req_ans_raw, data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting the Antenna data log of memory page ");
                                     sys_log_print_uint(i);
@@ -957,7 +911,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
 
                             if (!sat_data_buf.obdh.data.hibernation_on)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw, data_req_ans_raw_len) != 0)
+                                if (ttc_send(TTC_1, data_req_ans_raw, data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting the SBCD PKTS data log of memory page ");
                                     sys_log_print_uint(i);
@@ -1001,7 +955,7 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
 
                             if (!sat_data_buf.obdh.data.hibernation_on)
                             {
-                                if (ttc_send(TTC_0, data_req_ans_raw, data_req_ans_raw_len) != 0)
+                                if (ttc_send(TTC_1, data_req_ans_raw, data_req_ans_raw_len) != 0)
                                 {
                                     sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting the EDC data log of memory page ");
                                     sys_log_print_uint(i);
@@ -1480,248 +1434,6 @@ static void process_tc_deactivate_module(uint8_t *pkt, uint16_t pkt_len, bool is
     }
 }
 
-static void process_tc_activate_payload(uint8_t *pkt, uint16_t pkt_len, bool is_scheduled)
-{
-    struct conops_event pl_event = {
-        .ev_name = "PL_EN",
-        .callback = NULL,
-    };
-
-    int8_t err = 0;
-    bool authed = false;
-
-    if (pkt_len >= (1U + 7U + 1U))
-    {
-        switch (pkt[8])
-        {
-        case PL_ID_EDC_1:
-        {
-            if (!is_scheduled)
-            {
-                uint8_t tc_key[16] = CONFIG_TC_KEY_ACTIVATE_PAYLOAD_EDC; // cppcheck-suppress misra-c2012-7.4
-
-                if (process_tc_validate_hmac(pkt, 1U + 7U + 1U, &pkt[9], 20U, tc_key, sizeof(CONFIG_TC_KEY_ACTIVATE_PAYLOAD_EDC) - 1U))
-                {
-                    authed = true;
-                }
-            }
-
-            if ((authed) || (is_scheduled))
-            {
-                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Activating the EDC 1 payload...");
-                sys_log_new_line();
-
-                /* Update last valid tc parameter */
-                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
-                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-                // pl_event.ev_id = EV_TC_ENABLE_PAYLOAD; // Evento a ser retirado pois não será utilizado no CIMATÉLITE
-                pl_event.src = (uint16_t)PL_ID_EDC_1;
-                (void)notify_event_to_mission_manager(&pl_event);
-            }
-            else
-            {
-                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error activating the EDC 1 payload! Invalid key!");
-                sys_log_new_line();
-                err = -1;
-            }
-
-            break;
-        }
-        
-        case PL_ID_PAYLOAD_X:
-        {
-            if (!is_scheduled)
-            {
-                uint8_t tc_key[16] = CONFIG_TC_KEY_ACTIVATE_PAYLOAD_PAYLOAD_X; // cppcheck-suppress misra-c2012-7.4
-
-                if (process_tc_validate_hmac(pkt, 1U + 7U + 1U, &pkt[9], 20U, tc_key, sizeof(CONFIG_TC_KEY_ACTIVATE_PAYLOAD_PAYLOAD_X) - 1U))
-                {
-                    authed = true;
-                }
-            }
-
-            if ((authed) || (is_scheduled))
-            {
-                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Activating the Payload-X payload...");
-                sys_log_new_line();
-
-                /* Update last valid tc parameter */
-                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
-                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-                // pl_event.ev_id = EV_TC_ENABLE_PAYLOAD; // Evento a ser retirado pois não será utilizado no CIMATÉLITE
-                pl_event.src = (uint16_t)PL_ID_PAYLOAD_X;
-                (void)notify_event_to_mission_manager(&pl_event);
-            }
-            else
-            {
-                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error activating the Payload-X payload! Invalid key!");
-                sys_log_new_line();
-                err = -1;
-            }
-
-            break;
-        }
-        default:
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Invalid payload to activate!");
-            sys_log_new_line();
-            err = -1;
-            break;
-        }
-
-        if (err == 0)
-        {
-            /* Waits for Mission Manager notification. [Reuses startup event group to avoid memory usage] */
-            if ((xEventGroupWaitBits(task_startup_status, MISSION_MANAGER_NOTIFICATION_BIT, pdTRUE, pdTRUE, pdMS_TO_TICKS(TASK_PROCESS_TC_MAX_WAIT_TIME_MS)) & MISSION_MANAGER_NOTIFICATION_BIT) != 0U)
-            {
-                (void)send_tc_feedback(pkt, ERRNO_FB_SUCESSFULL_EXEC);
-            }
-            else
-            {
-                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Mission manager notify timed out for \"Activate payload\"");
-                sys_log_new_line();
-                (void)send_tc_feedback(pkt, ERRNO_FB_MISSION_MANAGER_NOTIFY_TIMEOUT);
-            }
-        }
-    }
-}
-
-static void process_tc_deactivate_payload(uint8_t *pkt, uint16_t pkt_len, bool is_scheduled)
-{
-    struct conops_event pl_event = {
-        .callback = NULL,
-        .ev_name = "PL_DIS",
-    };
-
-    int8_t err = 0;
-    bool authed = false;
-
-    if (pkt_len >= (1U + 7U + 1U))
-    {
-        switch (pkt[8])
-        {
-        case PL_ID_EDC_1:
-        {
-            if (!is_scheduled)
-            {
-                uint8_t tc_key[16] = CONFIG_TC_KEY_DEACTIVATE_PAYLOAD_EDC; // cppcheck-suppress misra-c2012-7.4
-
-                if (process_tc_validate_hmac(pkt, 1U + 7U + 1U, &pkt[9], 20U, tc_key, sizeof(CONFIG_TC_KEY_DEACTIVATE_PAYLOAD_EDC) - 1U))
-                {
-                    authed = true;
-                }
-            }
-
-//            if ((authed) || (is_scheduled))
-//            {
-//                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Deactivating the EDC 1 payload...");
-//                sys_log_new_line();
-//
-//                /* Update last valid tc parameter */
-//                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
-//                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-//                pl_event.ev_id = EV_TC_DISABLE_PAYLOAD;
-//                pl_event.src = (uint16_t)PL_ID_EDC_1;
-//                (void)notify_event_to_mission_manager(&pl_event);
-//            }
-//            else
-//            {
-//                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error deactivating the EDC 1 payload! Invalid key!");
-//                sys_log_new_line();
-//                err = -1;
-//            }
-
-            break;
-        }
-        case PL_ID_EDC_2:
-        {
-            if (!is_scheduled)
-            {
-                uint8_t tc_key[16] = CONFIG_TC_KEY_DEACTIVATE_PAYLOAD_EDC; // cppcheck-suppress misra-c2012-7.4
-
-                if (process_tc_validate_hmac(pkt, 1U + 7U + 1U, &pkt[9], 20U, tc_key, sizeof(CONFIG_TC_KEY_DEACTIVATE_PAYLOAD_EDC) - 1U))
-                {
-                    authed = true;
-                }
-            }
-
-//            if ((authed) || (is_scheduled))
-//            {
-//                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Deactivating the EDC 2 payload...");
-//                sys_log_new_line();
-//
-//                /* Update last valid tc parameter */
-//                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
-//                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-//                pl_event.ev_id = EV_TC_DISABLE_PAYLOAD;
-//                pl_event.src = (uint16_t)PL_ID_EDC_2;
-//                (void)notify_event_to_mission_manager(&pl_event);
-//            }
-//            else
-//            {
-//                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error deactivating the EDC 2 payload! Invalid key!");
-//                sys_log_new_line();
-//                err = -1;
-//            }
-
-            break;
-        }
-        case PL_ID_PAYLOAD_X:
-        {
-            if (!is_scheduled)
-            {
-                uint8_t tc_key[16] = CONFIG_TC_KEY_DEACTIVATE_PAYLOAD_PAYLOAD_X; // cppcheck-suppress misra-c2012-7.4
-
-                if (process_tc_validate_hmac(pkt, 1U + 7U + 1U, &pkt[9], 20U, tc_key, sizeof(CONFIG_TC_KEY_DEACTIVATE_PAYLOAD_PAYLOAD_X) - 1U))
-                {
-                    authed = true;
-                }
-            }
-
-//            if ((authed) || (is_scheduled))
-//            {
-//                sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Deactivating the Payload-X payload...");
-//                sys_log_new_line();
-//
-//                /* Update last valid tc parameter */
-//                sat_data_buf.obdh.data.last_valid_tc = pkt[0];
-//                sat_data_buf.obdh.data.ts_last_contact = system_get_time();
-//                pl_event.ev_id = EV_TC_DISABLE_PAYLOAD;
-//                pl_event.src = (uint16_t)PL_ID_PAYLOAD_X;
-//                (void)notify_event_to_mission_manager(&pl_event);
-//            }
-//            else
-//            {
-//                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error deactivating the Payload-X payload! Invalid key!");
-//                sys_log_new_line();
-//                err = -1;
-//            }
-
-            break;
-        }
-        default:
-            sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Invalid payload to deactivate!");
-            sys_log_new_line();
-            err = -1;
-            break;
-        }
-
-        if (err == 0)
-        {
-            /* Waits for Mission Manager notification. [Reuses startup event group to avoid memory usage] */
-            if ((xEventGroupWaitBits(task_startup_status, MISSION_MANAGER_NOTIFICATION_BIT, pdTRUE, pdTRUE, pdMS_TO_TICKS(TASK_PROCESS_TC_MAX_WAIT_TIME_MS)) & MISSION_MANAGER_NOTIFICATION_BIT) != 0U)
-            {
-                (void)send_tc_feedback(pkt, ERRNO_FB_SUCESSFULL_EXEC);
-            }
-            else
-            {
-                sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Mission manager notify timed out for \"Deactivate payload\"");
-                sys_log_new_line();
-                (void)send_tc_feedback(pkt, ERRNO_FB_MISSION_MANAGER_NOTIFY_TIMEOUT);
-            }
-        }
-    }
-}
-
 static void process_tc_erase_memory(uint8_t *pkt, uint16_t pkt_len, bool is_scheduled)
 {
     int8_t err = 0;
@@ -1875,7 +1587,7 @@ static void process_tc_get_subsystem_table(uint8_t *pkt, uint16_t pkt_len, bool 
 
                     if (!sat_data_buf.obdh.data.hibernation_on)
                     {
-                        if (ttc_send(TTC_0, pkt_raw, raw_pkt_len) != 0)
+                        if (ttc_send(TTC_1, pkt_raw, raw_pkt_len) != 0)
                         {
                             sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting a \"Get Subsystem Table\" answer!");
                             sys_log_new_line();
@@ -1903,7 +1615,7 @@ static void process_tc_get_subsystem_table(uint8_t *pkt, uint16_t pkt_len, bool 
 
                     if (!sat_data_buf.obdh.data.hibernation_on)
                     {
-                        if (ttc_send(TTC_0, pkt_raw, raw_pkt_len) != 0)
+                        if (ttc_send(TTC_1, pkt_raw, raw_pkt_len) != 0)
                         {
                             sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting a \"Get Subsystem Table\" answer!");
                             sys_log_new_line();
@@ -1931,7 +1643,7 @@ static void process_tc_get_subsystem_table(uint8_t *pkt, uint16_t pkt_len, bool 
 
                     if (!sat_data_buf.obdh.data.hibernation_on)
                     {
-                        if (ttc_send(TTC_0, pkt_raw, raw_pkt_len) != 0)
+                        if (ttc_send(TTC_1, pkt_raw, raw_pkt_len) != 0)
                         {
                             sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting a \"Get Subsystem Table\" answer!");
                             sys_log_new_line();
@@ -1959,7 +1671,7 @@ static void process_tc_get_subsystem_table(uint8_t *pkt, uint16_t pkt_len, bool 
 
                     if (!sat_data_buf.obdh.data.hibernation_on)
                     {
-                        if (ttc_send(TTC_0, pkt_raw, raw_pkt_len) != 0)
+                        if (ttc_send(TTC_1, pkt_raw, raw_pkt_len) != 0)
                         {
                             sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting a \"Get Subsystem Table\" answer!");
                             sys_log_new_line();
@@ -1987,7 +1699,7 @@ static void process_tc_get_subsystem_table(uint8_t *pkt, uint16_t pkt_len, bool 
 
                     if (!sat_data_buf.obdh.data.hibernation_on)
                     {
-                        if (ttc_send(TTC_0, pkt_raw, raw_pkt_len) != 0)
+                        if (ttc_send(TTC_1, pkt_raw, raw_pkt_len) != 0)
                         {
                             sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting a \"Get Subsystem Table\" answer!");
                             sys_log_new_line();
@@ -2017,7 +1729,7 @@ static void process_tc_get_subsystem_table(uint8_t *pkt, uint16_t pkt_len, bool 
 
                     if (!sat_data_buf.obdh.data.hibernation_on)
                     {
-                        if (ttc_send(TTC_0, pkt_raw, raw_pkt_len) != 0)
+                        if (ttc_send(TTC_1, pkt_raw, raw_pkt_len) != 0)
                         {
                             sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting a \"Get Subsystem Table\" answer!");
                             sys_log_new_line();
@@ -2045,7 +1757,7 @@ static void process_tc_get_subsystem_table(uint8_t *pkt, uint16_t pkt_len, bool 
 
                     if (!sat_data_buf.obdh.data.hibernation_on)
                     {
-                        if (ttc_send(TTC_0, pkt_raw, raw_pkt_len) != 0)
+                        if (ttc_send(TTC_1, pkt_raw, raw_pkt_len) != 0)
                         {
                             sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting a \"Get Subsystem Table\" answer!");
                             sys_log_new_line();
@@ -2073,7 +1785,7 @@ static void process_tc_get_subsystem_table(uint8_t *pkt, uint16_t pkt_len, bool 
 
                     if (!sat_data_buf.obdh.data.hibernation_on)
                     {
-                        if (ttc_send(TTC_0, pkt_raw, raw_pkt_len) != 0)
+                        if (ttc_send(TTC_1, pkt_raw, raw_pkt_len) != 0)
                         {
                             sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting a \"Get Subsystem Table\" answer!");
                             sys_log_new_line();
@@ -2346,7 +2058,7 @@ static void process_tc_get_parameter(uint8_t *pkt, uint16_t pkt_len, bool is_sch
 
                 if (!sat_data_buf.obdh.data.hibernation_on)
                 {
-                    if (ttc_send(TTC_0, param_pl_raw, param_pl_raw_len) != 0)
+                    if (ttc_send(TTC_1, param_pl_raw, param_pl_raw_len) != 0)
                     {
                         sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting a \"get parameter\" answer!");
                         sys_log_new_line();
@@ -2426,7 +2138,7 @@ static void process_tc_transmit_packet(uint8_t *pkt, uint16_t pkt_len, bool is_s
 
                 if (!sat_data_buf.obdh.data.hibernation_on)
                 {
-                    if (ttc_send(TTC_0, raw_pkt, raw_pkt_len) != 0)
+                    if (ttc_send(TTC_1, raw_pkt, raw_pkt_len) != 0)
                     {
                         sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting a \"Packet Broadcast\"!");
                         sys_log_new_line();
@@ -3210,7 +2922,7 @@ static int8_t send_tc_feedback(uint8_t *pkt, int16_t error_code)
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME, "Transmitting \"TC Feedback\"...");
         sys_log_new_line();
 
-        if (ttc_send(TTC_0, feedback_pkt, feedback_pkt_len) != 0)
+        if (ttc_send(TTC_1, feedback_pkt, feedback_pkt_len) != 0)
         {
             sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_PROCESS_TC_NAME, "Error transmitting a \"TC Feedback\"!");
             sys_log_new_line();
