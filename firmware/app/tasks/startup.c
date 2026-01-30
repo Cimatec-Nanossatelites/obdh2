@@ -128,6 +128,27 @@ void vTaskStartup(void *p)
     }
 #endif /* CONFIG_DEV_MEDIA_NOR_ENABLED */
 
+#if defined(CONFIG_DEV_MEDIA_FRAM_DISK_ENABLED) && (CONFIG_DEV_MEDIA_FRAM_DISK_ENABLED == 1)
+   /* FRAM memory initialization */
+    for (int i = 0; i < MEDIA_INIT_MAX_RETRY; ++i)
+    {
+        if (media_init(MEDIA_FRAM) == 0)
+        {
+            err = 0;
+            break;
+        }
+    }
+
+    if (err != 0) 
+    {
+        error_counter++;
+    }
+    else 
+    {
+        err = -1;
+    }
+#endif /* CONFIG_DEV_MEDIA_NOR_ENABLED */
+
 #if defined(CONFIG_DEV_MEDIA_FRAM_ENABLED) && (CONFIG_DEV_MEDIA_FRAM_ENABLED == 1)
     /* FRAM memory initialization */
     if (system_get_hw_version() >= (uint8_t)HW_VERSION_1)

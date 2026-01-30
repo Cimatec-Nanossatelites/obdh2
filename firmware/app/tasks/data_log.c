@@ -46,9 +46,11 @@
 #include "startup.h"
 #include "lfs.h"
 #include "drivers/mt25q/mt25q.h"
+#include <app/structs/satellite.h>
+#include "semphr.h"
 
 xTaskHandle xTaskDataLogHandle;
-
+SemaphoreHandle_t xSemaphore_File_System_Access = NULL;
 // Read a region in a block. Negative error codes are propagated
 // to the user.
 int _flash_read(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size){
@@ -95,13 +97,19 @@ const struct lfs_config cfg = {
 };
 
 
+/**
+ * @brief Data log task main loop.
+ *
+ * This FreeRTOS task is responsible for initializing the LittleFS
+ * filesystem on NOR flash, maintaining the boot counter file and
+ * periodically saving telemetry data to flash.
+ *
+ * @param p Unused task parameter (pointer passed by FreeRTOS at task create).
+ */
 void vTaskDataLog(void *p)
 {
     (void)p;
-    // read current count
-    uint32_t boot_count = 0;
-
-    /* Wait startup task to finish */
+     /* Wait startup task to finish */
     (void)xEventGroupWaitBits(task_startup_status, TASK_STARTUP_DONE, pdFALSE, pdTRUE, pdMS_TO_TICKS(TASK_DATA_LOG_INIT_TIMEOUT_MS));
 
     /* Wait 5 minutes before saving data for the first time */
@@ -117,42 +125,36 @@ void vTaskDataLog(void *p)
     // reformat if we can't mount the filesystem
     // this should only happen on the first boot
     if (err) {
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Error mounting NOR to littlefs. Formatting...");
+        sys_log_new_line();
         err = lfs_format(&lfs, &cfg);
         if(err == 0){
             err = lfs_mount(&lfs, &cfg);
         }else{
-            while(1);
+            sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Error formatting NOR to littlefs...");
+            sys_log_new_line();
         }        
     }
 
 
-    lfs_file_open(&lfs, &file, "boot_count", LFS_O_RDWR | LFS_O_CREAT);
-    lfs_file_read(&lfs, &file, &boot_count, sizeof(boot_count));
+    if(xTaskDataLog_Initialize_Cimatelite_Log() != DATA_LOG_CIMATELITE_OK){
+        /* Print the error */
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Error initializing CIMATELITE log file...");
+        sys_log_new_line();
 
-    // update boot count
-    boot_count += 1;
-    lfs_file_rewind(&lfs, &file);
-    lfs_file_write(&lfs, &file, &boot_count, sizeof(boot_count));
-
-    // remember the storage is not updated until the file is closed successfully
-    lfs_file_close(&lfs, &file);
-
-    // release any resources we were using
-    lfs_unmount(&lfs);
+    }
 
     TickType_t last_cycle = xTaskGetTickCount();
 
     while(1)
     {
+        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Saving data to flash memory...");
+        sys_log_new_line();
 
-
-        // sys_log_print_event_from_module(SYS_LOG_INFO, TASK_DATA_LOG_NAME, "Saving data to flash memory...");
-        // sys_log_new_line();
-
-        // /* Update OBDH timestamp atomically */
-        // taskENTER_CRITICAL();
-        // sat_data_buf.obdh.timestamp = system_get_time();
-        // taskEXIT_CRITICAL();
+        /* Update OBDH timestamp atomically */
+        taskENTER_CRITICAL();
+        sat_data_buf.obdh.timestamp = system_get_time();
+        taskEXIT_CRITICAL();
 
         // /* OBDH data */
         // (void)memcpy(&page_buf[0], (void*)&sat_data_buf.obdh, sizeof(obdh_telemetry_t));
@@ -288,4 +290,171 @@ void vTaskDataLog(void *p)
     }
 }
 
+
+
+
+/**
+ * @brief Initialize the Cimatelite log file in the filesystem.
+ *
+ * Ensures the log file named by `DATA_LOG_CIMATELITE_FILE_NAME` exists.
+ * If the file cannot be created or opened, an error code is returned.
+ *
+ * @return DATA_LOG_CIMATELITE_OK on success
+ * @return DATA_LOG_CIMATELITE_ERROR on failure
+ */
+data_log_err_t  xTaskDataLog_Initialize_Cimatelite_Log(void){
+    int err = 0;
+    lfs_file_t File_Handler;
+    /* Initialize Geodesic LOG File */
+    err = lfs_file_open(&lfs, &File_Handler, (char *)DATA_LOG_CIMATELITE_FILE_NAME, LFS_O_RDWR | LFS_O_CREAT);
+    if (err != 0)
+        return DATA_LOG_CIMATELITE_ERROR;
+    lfs_file_close(&lfs, &File_Handler);
+
+    return DATA_LOG_CIMATELITE_OK;
+}
+
+/**
+ * @brief Get the current size (in bytes) of the Cimatelite log file.
+ *
+ * This function reads the size of the file identified by
+ * `DATA_LOG_CIMATELITE_FILE_NAME` and places the result in `log_size`.
+ *
+ * @param[out] log_size Pointer to a uint32_t that will receive the file size in bytes.
+ *
+ * @return DATA_LOG_CIMATELITE_OK on success and `log_size` is updated
+ * @return DATA_LOG_CIMATELITE_ERROR if an error occurred (e.g., filesystem not initialized or file missing)
+ */
+data_log_err_t  xTaskDataLog_Get_Cimatelite_Log_Size(uint32_t *log_size){
+    int err = 0;
+    lfs_file_t File_Handler;
+
+    err = lfs_file_open(&lfs, &File_Handler, (char *)DATA_LOG_CIMATELITE_FILE_NAME, LFS_O_RDONLY);
+    if (err < 0)
+        return DATA_LOG_CIMATELITE_ERROR;
+
+    *log_size = lfs_file_size(&lfs, &File_Handler) / sizeof(cimatelite_telemetry_t);
+    lfs_file_close(&lfs, &File_Handler);
+
+    return DATA_LOG_CIMATELITE_OK;
+}
+
+/**
+ * @brief Append a Cimatelite telemetry record to the Cimatelite log file.
+ *
+ * The function should open the log file, append the provided `log_data`
+ * structure and close the file. The exact binary layout written depends on
+ * the definition of `cimatelite_telemetry_t`.
+ *
+ * @param[in] log_data Telemetry structure to append to the log.
+ *
+ * @return DATA_LOG_CIMATELITE_OK on success
+ * @return DATA_LOG_CIMATELITE_ERROR on failure
+ */
+data_log_err_t  xTaskDataLog_Insert_Cimatelite_Log_Data(cimatelite_telemetry_t log_data){
+  int fs_err;
+  lfs_file_t File_Handler;
+
+
+  xSemaphoreTake(xSemaphore_File_System_Access, portMAX_DELAY);
+  fs_err = lfs_file_open(&lfs, &File_Handler, (char *)DATA_LOG_CIMATELITE_FILE_NAME, LFS_O_APPEND | LFS_O_WRONLY);
+  if (fs_err < 0) {
+    xSemaphoreGive(xSemaphore_File_System_Access);
+    return DATA_LOG_CIMATELITE_ERROR;
+  }
+
+  fs_err = lfs_file_write(&lfs, &File_Handler, (void *)&log_data, sizeof(cimatelite_telemetry_t));
+  if (fs_err != sizeof(cimatelite_telemetry_t)) {
+    /* File write size is not equal to the file size */
+    goto insert_data_error;
+  }
+
+  lfs_file_close(&lfs, &File_Handler);
+  xSemaphoreGive(xSemaphore_File_System_Access);
+  return DATA_LOG_CIMATELITE_OK;
+insert_data_error:
+  lfs_file_close(&lfs, &File_Handler);
+  xSemaphoreGive(xSemaphore_File_System_Access);
+  return DATA_LOG_CIMATELITE_ERROR;
+}
+
+/**
+ * @brief Clear (truncate/recreate) the Cimatelite log file.
+ *
+ * Removes the existing log file and recreates it empty. This function
+ * acquires the filesystem semaphore while operating to ensure exclusive
+ * access.
+ *
+ * @return DATA_LOG_CIMATELITE_OK on success
+ * @return LIB_LOG_ERROR on failure
+ */
+data_log_err_t  xTaskDataLog_Clear_Cimatelite_Log(void){
+    int fs_err;
+    lfs_file_t File_Handler;
+
+    xSemaphoreTake(xSemaphore_File_System_Access, portMAX_DELAY);
+    fs_err = lfs_remove(&lfs, (char *)DATA_LOG_CIMATELITE_FILE_NAME);
+    if (fs_err < 0) {
+        xSemaphoreGive(xSemaphore_File_System_Access);
+        return DATA_LOG_CIMATELITE_ERROR;
+    }
+
+    fs_err = lfs_file_open(&lfs, &File_Handler, (char *)DATA_LOG_CIMATELITE_FILE_NAME, LFS_O_RDWR | LFS_O_CREAT);
+    if (fs_err < 0) {
+        xSemaphoreGive(xSemaphore_File_System_Access);                                                                                                                       xSemaphoreGive(xSemaphore_File_System_Access);
+        return DATA_LOG_CIMATELITE_ERROR;
+    }
+
+    lfs_file_close(&lfs, &File_Handler);
+
+    xSemaphoreGive(xSemaphore_File_System_Access);
+    return DATA_LOG_CIMATELITE_OK;
+}
+
+/**
+ * \brief Reads data from the Cimatelite log file.
+ *
+ * \param log_data Pointer to the buffer where the read data will be stored.
+ * \param start_index The index of the first element to read.
+ *
+ * \return DATA_LOG_CIMATELITE_OK if successful, otherwise DATA_LOG_CIMATELITE_ERROR.
+ */
+data_log_err_t  xTaskDataLog_Read_Cimatelite_Log(cimatelite_telemetry_t *log_data, uint32_t start_index){
+    int fs_err;
+    lfs_file_t File_Handler;
+    uint32_t offset_bytes;
+    uint32_t log_size;
+    
+    offset_bytes = start_index * sizeof(cimatelite_telemetry_t);
+
+    xSemaphoreTake(xSemaphore_File_System_Access, portMAX_DELAY);
+    fs_err = lfs_file_open(&lfs, &File_Handler, (char *)DATA_LOG_CIMATELITE_FILE_NAME, LFS_O_RDONLY);
+    if (fs_err < 0) {
+        xSemaphoreGive(xSemaphore_File_System_Access);
+        return DATA_LOG_CIMATELITE_ERROR;
+    }
+
+    log_size = lfs_file_size(&lfs, &File_Handler) / sizeof(cimatelite_telemetry_t);
+    if(start_index >= log_size){
+        lfs_file_close(&lfs, &File_Handler);
+        xSemaphoreGive(xSemaphore_File_System_Access);
+        return DATA_LOG_CIMATELITE_ERROR;
+    }
+
+    fs_err = lfs_file_seek(&lfs, &File_Handler, offset_bytes, LFS_SEEK_SET);
+    if (fs_err < 0) {
+        xSemaphoreGive(xSemaphore_File_System_Access);
+        return DATA_LOG_CIMATELITE_ERROR;
+    }
+
+    fs_err = lfs_file_read(&lfs, &File_Handler, (void *)log_data, sizeof(cimatelite_telemetry_t));
+    if (fs_err != sizeof(cimatelite_telemetry_t)) {
+        xSemaphoreGive(xSemaphore_File_System_Access);
+        return DATA_LOG_CIMATELITE_ERROR;
+    }
+
+    lfs_file_close(&lfs, &File_Handler);
+    xSemaphoreGive(xSemaphore_File_System_Access);
+    return DATA_LOG_CIMATELITE_OK;   
+}
 /** \} End of file_system group */
