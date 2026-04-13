@@ -60,7 +60,7 @@
 static inline int32_t handle_deployment_evs(const struct conops_fsm *ctx,
                                             const struct conops_event *ev)
 {
-    (void) ctx;
+    (void)ctx;
     sat_data_t *sat = ctx->user_data;
     int32_t transition_to = OBDH_MODE_DEPLOYMENT;
 
@@ -80,8 +80,8 @@ static inline int32_t handle_deployment_evs(const struct conops_fsm *ctx,
         transition_to = OBDH_MODE_STAND_BY;
         break;
     case EV_DEPLOYMENT_COMPLETE:
-        if (is_satellite_in_brazil((float) sat->obdh.data.position.latitude,
-                                   (float) sat->obdh.data.position.longitude))
+        if (is_satellite_in_brazil((float)sat->obdh.data.position.latitude,
+                                   (float)sat->obdh.data.position.longitude))
         {
             transition_to = OBDH_MODE_NORMAL;
         }
@@ -101,7 +101,7 @@ static inline int32_t handle_deployment_evs(const struct conops_fsm *ctx,
 static inline int32_t handle_nominal_evs(const struct conops_fsm *ctx,
                                          const struct conops_event *ev)
 {
-    (void) ctx;
+    (void)ctx;
     int32_t transition_to = OBDH_MODE_NORMAL;
 
     switch (ev->ev_id)
@@ -133,7 +133,7 @@ static inline int32_t handle_nominal_evs(const struct conops_fsm *ctx,
 static inline int32_t handle_standby_evs(const struct conops_fsm *ctx,
                                          const struct conops_event *ev)
 {
-    (void) ctx;
+    (void)ctx;
     int32_t transition_to = OBDH_MODE_STAND_BY;
 
     switch (ev->ev_id)
@@ -188,8 +188,8 @@ static inline int32_t handle_fdir_evs(const struct conops_fsm *ctx,
         transition_to = OBDH_MODE_FDIR;
         break;
     case EV_FDIR_RESOLVED:
-        if (is_satellite_in_brazil((float) sat->obdh.data.position.latitude,
-                                   (float) sat->obdh.data.position.longitude))
+        if (is_satellite_in_brazil((float)sat->obdh.data.position.latitude,
+                                   (float)sat->obdh.data.position.longitude))
         {
             transition_to = OBDH_MODE_NORMAL;
         }
@@ -234,8 +234,7 @@ static int enable_ttc_tx(void)
         }
 
         --retry_count;
-    }
-    while ((err < 0) && (retry_count > 0U));
+    } while ((err < 0) && (retry_count > 0U));
 
     if (retry_count == 0U)
     {
@@ -273,8 +272,7 @@ static int disable_ttc_tx(void)
         }
 
         --retry_count;
-    }
-    while ((err < 0) && (retry_count > 0U));
+    } while ((err < 0) && (retry_count > 0U));
 
     if (retry_count == 0U)
     {
@@ -288,19 +286,20 @@ static int goto_nominal_mode(struct conops_fsm *ctx,
                              const struct conops_event *ev,
                              const uint16_t transition_to)
 {
-    (void) transition_to;
+    (void)transition_to;
     sat_data_t *sat = ctx->user_data;
     int retval = 0;
 
     sys_log_print_event_from_module(
-            SYS_LOG_INFO, TASK_MISSION_MANAGER_NAME,
-            "Transitioning to Nominal Mode because of event (");
-    sys_log_print_hex((uint32_t) ev->ev_id);
+        SYS_LOG_INFO, TASK_MISSION_MANAGER_NAME,
+        "Transitioning to Nominal Mode because of event (");
+    sys_log_print_hex((uint32_t)ev->ev_id);
     sys_log_print_msg(")...");
     sys_log_new_line();
 
     sat_data_buf.obdh.data.general_telemetry_on = true;
     sat_data_buf.obdh.data.payload_telemetry_on = true;
+    sat_data_buf.obdh.data.eps_beacon_on = true;
 
     if ((ev->ev_id != EV_PERSIST_STATE_ON_INIT) && (retval == 0))
     {
@@ -310,28 +309,43 @@ static int goto_nominal_mode(struct conops_fsm *ctx,
     }
 
     return retval;
-
 }
 
 static int goto_standby_mode(struct conops_fsm *ctx,
                              const struct conops_event *ev,
                              const uint16_t transition_to)
 {
-    (void) transition_to;
+    (void)transition_to;
     sat_data_t *sat = ctx->user_data;
     int retval = 0;
     int err = 0;
     uint8_t retry_count = 5U;
 
     sys_log_print_event_from_module(
-            SYS_LOG_INFO, TASK_MISSION_MANAGER_NAME,
-            "Transitioning to Stand-by Mode because of event (");
-    sys_log_print_hex((uint32_t) ev->ev_id);
+        SYS_LOG_INFO, TASK_MISSION_MANAGER_NAME,
+        "Transitioning to Stand-by Mode because of event (");
+    sys_log_print_hex((uint32_t)ev->ev_id);
     sys_log_print_msg(")...");
     sys_log_new_line();
 
     sat->obdh.data.general_telemetry_on = false;
     sat->obdh.data.payload_telemetry_on = false;
+
+    //Desativando o Beacon ao sair do Brasil
+    do
+    {
+        err = eps_set_param(SL_EPS2_REG_BEACON_ENABLE, 0U);
+        vTaskDelay(100U);
+        --retry_count;
+    } while ((err < 0) && (retry_count > 0U));
+
+    if (retry_count == 0U)
+    {
+        sys_log_print_event_from_module(SYS_LOG_ERROR,
+                                        TASK_MISSION_MANAGER_NAME,
+                                        "Failed to disable EPS beacon!");
+        sys_log_new_line();
+    }
 
     if ((ev->ev_id != EV_PERSIST_STATE_ON_INIT) && (retval == 0))
     {
@@ -346,32 +360,31 @@ static int goto_standby_mode(struct conops_fsm *ctx,
 static int goto_fdir_mode(struct conops_fsm *ctx, const struct conops_event *ev,
                           const uint16_t transition_to)
 {
-    (void) transition_to;
+    (void)transition_to;
     sat_data_t *sat = ctx->user_data;
     int retval = 0;
     int err = 0;
     uint8_t retry_count = 5U;
 
     sys_log_print_event_from_module(
-            SYS_LOG_WARNING, TASK_MISSION_MANAGER_NAME,
-            "Transitioning to FDIR Mode because of event (");
-    sys_log_print_hex((uint32_t) ev->ev_id);
+        SYS_LOG_WARNING, TASK_MISSION_MANAGER_NAME,
+        "Transitioning to FDIR Mode because of event (");
+    sys_log_print_hex((uint32_t)ev->ev_id);
     sys_log_print_msg(")...");
     sys_log_new_line();
 
-    //Beacon sendo desativado no modo FDIR
+    // Beacon sendo desativado no modo FDIR
     do
     {
         err = eps_set_param(SL_EPS2_REG_BEACON_ENABLE, 0U);
         vTaskDelay(100U);
         --retry_count;
-    }
-    while ((err < 0) && (retry_count > 0U));
+    } while ((err < 0) && (retry_count > 0U));
 
     if (retry_count == 0U)
     {
         sys_log_print_event_from_module(SYS_LOG_ERROR,
-        TASK_MISSION_MANAGER_NAME,
+                                        TASK_MISSION_MANAGER_NAME,
                                         "Failed to disable EPS beacon!");
         sys_log_new_line();
     }
@@ -399,7 +412,7 @@ static int32_t event_mapper(const struct conops_fsm *ctx,
         taskENTER_CRITICAL();
 
         sat->obdh.data.hibernation_on = true;
-        sys_time_t hib_duration_hours = (sys_time_t) ev->src;
+        sys_time_t hib_duration_hours = (sys_time_t)ev->src;
         sat_data_buf.obdh.data.hib_duration = hib_duration_hours * 60UL * 60UL;
 
         taskEXIT_CRITICAL();
@@ -413,8 +426,8 @@ static int32_t event_mapper(const struct conops_fsm *ctx,
         if (disable_ttc_tx() < 0)
         {
             sys_log_print_event_from_module(
-                    SYS_LOG_ERROR, TASK_MISSION_MANAGER_NAME,
-                    "Failed to disable transmissions through TTC!");
+                SYS_LOG_ERROR, TASK_MISSION_MANAGER_NAME,
+                "Failed to disable transmissions through TTC!");
             sys_log_new_line();
         }
 
@@ -433,8 +446,8 @@ static int32_t event_mapper(const struct conops_fsm *ctx,
         if (enable_ttc_tx() < 0)
         {
             sys_log_print_event_from_module(
-                    SYS_LOG_ERROR, TASK_MISSION_MANAGER_NAME,
-                    "Failed to enable transmissions through TTC!");
+                SYS_LOG_ERROR, TASK_MISSION_MANAGER_NAME,
+                "Failed to enable transmissions through TTC!");
             sys_log_new_line();
         }
 
@@ -447,15 +460,15 @@ static int32_t event_mapper(const struct conops_fsm *ctx,
         sat_data_buf.obdh.data.hib_duration = 0U;
 
         sys_log_print_event_from_module(
-                SYS_LOG_INFO, TASK_MISSION_MANAGER_NAME,
-                "Hibernation timeout! Enabling transmissions...");
+            SYS_LOG_INFO, TASK_MISSION_MANAGER_NAME,
+            "Hibernation timeout! Enabling transmissions...");
         sys_log_new_line();
 
         if (enable_ttc_tx() < 0)
         {
             sys_log_print_event_from_module(
-                    SYS_LOG_ERROR, TASK_MISSION_MANAGER_NAME,
-                    "Failed to enable transmissions through TTC!");
+                SYS_LOG_ERROR, TASK_MISSION_MANAGER_NAME,
+                "Failed to enable transmissions through TTC!");
             sys_log_new_line();
         }
 
@@ -492,19 +505,19 @@ static int32_t event_mapper(const struct conops_fsm *ctx,
 }
 
 static conops_transition_handler_t mode_transition_table[MISSION_OPERATION_MODES][MISSION_OPERATION_MODES] =
-        { /*Deployment (DM) | NOMINAL (NM) | STAND BY (SBM) | FDIR (FDM) */
-        /* DM */{ NULL, goto_nominal_mode, goto_standby_mode, goto_fdir_mode },
-        /* NM */{ NULL, NULL, goto_standby_mode, goto_fdir_mode },
-        /* SBM */{ NULL, goto_nominal_mode, NULL, goto_fdir_mode },
-        /* FDIR */{ NULL, goto_nominal_mode, goto_standby_mode, NULL } };
+    {/*Deployment (DM) | NOMINAL (NM) | STAND BY (SBM) | FDIR (FDM) */
+     /* DM */ {NULL, goto_nominal_mode, goto_standby_mode, goto_fdir_mode},
+     /* NM */ {NULL, NULL, goto_standby_mode, goto_fdir_mode},
+     /* SBM */ {NULL, goto_nominal_mode, NULL, goto_fdir_mode},
+     /* FDIR */ {NULL, goto_nominal_mode, goto_standby_mode, NULL}};
 
 static int satellite_persist_op_mode(struct conops_fsm *ctx)
 {
     int retval = 0;
 
-    const conops_transition_handler_t handlers[] = { NULL, goto_nominal_mode,
-                                                     goto_standby_mode,
-                                                     goto_fdir_mode };
+    const conops_transition_handler_t handlers[] = {NULL, goto_nominal_mode,
+                                                    goto_standby_mode,
+                                                    goto_fdir_mode};
 
     conops_transition_handler_t handler = goto_fdir_mode;
 
@@ -515,10 +528,14 @@ static int satellite_persist_op_mode(struct conops_fsm *ctx)
 
     if (handler != NULL)
     {
-        const struct conops_event fsm_init = { .src = 0U, .ev_id =
-        EV_PERSIST_STATE_ON_INIT,
-                                               .ev_name = "INIT", .callback =
-                                               NULL, };
+        const struct conops_event fsm_init = {
+            .src = 0U,
+            .ev_id =
+                EV_PERSIST_STATE_ON_INIT,
+            .ev_name = "INIT",
+            .callback =
+                NULL,
+        };
 
         retval = (handler)(ctx, &fsm_init, ctx->state);
     }
@@ -531,33 +548,33 @@ TaskHandle_t xTaskMissionManagerHandle;
 
 void vTaskMissionManager(void *p)
 {
-    (void) p;
+    (void)p;
 
-    struct conops_fsm op_mode_fsm = { 0 };
-    struct conops_event ev = { 0 };
+    struct conops_fsm op_mode_fsm = {0};
+    struct conops_event ev = {0};
     int err = 0;
 
-    (void) xEventGroupWaitBits(
-            task_startup_status, TASK_STARTUP_DONE, pdFALSE, pdTRUE,
-            pdMS_TO_TICKS(TASK_MISSION_MANAGER_STARTUP_TIMEOUT_MS));
+    (void)xEventGroupWaitBits(
+        task_startup_status, TASK_STARTUP_DONE, pdFALSE, pdTRUE,
+        pdMS_TO_TICKS(TASK_MISSION_MANAGER_STARTUP_TIMEOUT_MS));
     sys_log_print_event_from_module(
-            SYS_LOG_INFO, TASK_MISSION_MANAGER_NAME,
-            "Initializing operation mode state machine in mode (");
-    sys_log_print_hex((uint32_t) sat_data_buf.obdh.data.mode);
+        SYS_LOG_INFO, TASK_MISSION_MANAGER_NAME,
+        "Initializing operation mode state machine in mode (");
+    sys_log_print_hex((uint32_t)sat_data_buf.obdh.data.mode);
     sys_log_print_msg(")...");
     sys_log_new_line();
 
     err = conops_fsm_init(&op_mode_fsm, mode_transition_table,
-    MISSION_OPERATION_MODES,
+                          MISSION_OPERATION_MODES,
                           EV_TC_LEAVE_HIBERNATION, sat_data_buf.obdh.data.mode,
                           satellite_persist_op_mode);
     if (err < 0)
     {
         sys_log_print_event_from_module(
-                SYS_LOG_ERROR,
-                TASK_MISSION_MANAGER_NAME,
-                "Failed to initialize operation mode state machine! Mode was (");
-        sys_log_print_hex((uint32_t) sat_data_buf.obdh.data.mode);
+            SYS_LOG_ERROR,
+            TASK_MISSION_MANAGER_NAME,
+            "Failed to initialize operation mode state machine! Mode was (");
+        sys_log_print_hex((uint32_t)sat_data_buf.obdh.data.mode);
         sys_log_print_msg(")");
         sys_log_new_line();
 
@@ -565,16 +582,16 @@ void vTaskMissionManager(void *p)
         {
             sat_data_buf.obdh.data.mode = OBDH_MODE_FDIR;
             /* Reinitialize FSM in FDIR, since something corrupted the operation mode stored in FRAM */
-            (void) conops_fsm_init(&op_mode_fsm, mode_transition_table,
-            MISSION_OPERATION_MODES,
-                                   EV_TC_LEAVE_HIBERNATION,
-                                   sat_data_buf.obdh.data.mode,
-                                   satellite_persist_op_mode);
+            (void)conops_fsm_init(&op_mode_fsm, mode_transition_table,
+                                  MISSION_OPERATION_MODES,
+                                  EV_TC_LEAVE_HIBERNATION,
+                                  sat_data_buf.obdh.data.mode,
+                                  satellite_persist_op_mode);
         }
     }
 
-    (void) conops_register_mapper(&op_mode_fsm, event_mapper);
-    (void) conops_register_fsm_user_data(&op_mode_fsm, &sat_data_buf);
+    (void)conops_register_mapper(&op_mode_fsm, event_mapper);
+    (void)conops_register_fsm_user_data(&op_mode_fsm, &sat_data_buf);
 
     while (1)
     {
@@ -582,12 +599,12 @@ void vTaskMissionManager(void *p)
                 event_queue,
                 &ev,
                 pdMS_TO_TICKS_64(
-                        TASK_MISSION_MANAGER_EV_NOTIFICATION_TIMEOUT)) == pdPASS)
+                    TASK_MISSION_MANAGER_EV_NOTIFICATION_TIMEOUT)) == pdPASS)
         {
             sys_log_print_event_from_module(SYS_LOG_INFO,
-            TASK_MISSION_MANAGER_NAME,
+                                            TASK_MISSION_MANAGER_NAME,
                                             "Received new event (");
-            sys_log_print_hex((uint32_t) ev.ev_id);
+            sys_log_print_hex((uint32_t)ev.ev_id);
             sys_log_print_msg(")!");
             sys_log_new_line();
 
@@ -598,14 +615,14 @@ void vTaskMissionManager(void *p)
                 if (EV_CHECK_CRIT_BITMASK(ev.ev_id))
                 {
                     /* Notify TC executing task that the event was processed sucessfully */
-                    (void) xEventGroupSetBits(task_startup_status,
-                                              MISSION_MANAGER_NOTIFICATION_BIT);
+                    (void)xEventGroupSetBits(task_startup_status,
+                                             MISSION_MANAGER_NOTIFICATION_BIT);
                 }
             }
             else
             {
                 sys_log_print_event_from_module(SYS_LOG_ERROR,
-                TASK_MISSION_MANAGER_NAME,
+                                                TASK_MISSION_MANAGER_NAME,
                                                 "Failed to process event!");
                 sys_log_new_line();
             }
@@ -613,12 +630,11 @@ void vTaskMissionManager(void *p)
         else
         {
             sys_log_print_event_from_module(SYS_LOG_WARNING,
-            TASK_MISSION_MANAGER_NAME,
+                                            TASK_MISSION_MANAGER_NAME,
                                             "Notification waiting timed out!");
             sys_log_new_line();
         }
     }
-
 }
 
 int8_t notify_event_to_mission_manager(const struct conops_event *ev)
