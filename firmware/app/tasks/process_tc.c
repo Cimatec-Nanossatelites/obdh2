@@ -700,6 +700,13 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
                                 }
                             }
                         }
+                        else
+                        {
+                            if (!sat_data_buf.obdh.data.hibernation_on)
+                            {
+                                (void)send_tc_feedback(pkt, ERRNO_FB_DEVICE_COMM_FAIL);
+                            }
+                        }
                         vTaskDelay(pdMS_TO_TICKS(25U));
                     }
                 }
@@ -742,6 +749,13 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
                                     sys_log_print_msg("!");
                                     sys_log_new_line();
                                 }
+                            }
+                        }
+                        else
+                        {
+                            if (!sat_data_buf.obdh.data.hibernation_on)
+                            {
+                                (void)send_tc_feedback(pkt, ERRNO_FB_DEVICE_COMM_FAIL);
                             }
                         }
                         vTaskDelay(pdMS_TO_TICKS(25U));
@@ -788,6 +802,13 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
                                 }
                             }
                         }
+                        else
+                        {
+                            if (!sat_data_buf.obdh.data.hibernation_on)
+                            {
+                                (void)send_tc_feedback(pkt, ERRNO_FB_DEVICE_COMM_FAIL);
+                            }
+                        }
                         vTaskDelay(pdMS_TO_TICKS(25U));
                     }
                 }
@@ -830,6 +851,13 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
                                     sys_log_print_msg("!");
                                     sys_log_new_line();
                                 }
+                            }
+                        }
+                        else
+                        {
+                            if (!sat_data_buf.obdh.data.hibernation_on)
+                            {
+                                (void)send_tc_feedback(pkt, ERRNO_FB_DEVICE_COMM_FAIL);
                             }
                         }
                         vTaskDelay(pdMS_TO_TICKS(25U));
@@ -876,6 +904,13 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
                                 }
                             }
                         }
+                        else
+                        {
+                            if (!sat_data_buf.obdh.data.hibernation_on)
+                            {
+                                (void)send_tc_feedback(pkt, ERRNO_FB_DEVICE_COMM_FAIL);
+                            }
+                        }
                         vTaskDelay(pdMS_TO_TICKS(25U));
                     }
                 }
@@ -920,6 +955,13 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
                                 }
                             }
                         }
+                        else
+                        {
+                            if (!sat_data_buf.obdh.data.hibernation_on)
+                            {
+                                (void)send_tc_feedback(pkt, ERRNO_FB_DEVICE_COMM_FAIL);
+                            }
+                        }
                         vTaskDelay(pdMS_TO_TICKS(25U));
                     }
                 }
@@ -962,6 +1004,13 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
                                     sys_log_print_msg("!");
                                     sys_log_new_line();
                                 }
+                            }
+                        }
+                        else
+                        {
+                            if (!sat_data_buf.obdh.data.hibernation_on)
+                            {
+                                (void)send_tc_feedback(pkt, ERRNO_FB_DEVICE_COMM_FAIL);
                             }
                         }
                         vTaskDelay(pdMS_TO_TICKS(25U));
@@ -1019,6 +1068,13 @@ static void process_tc_data_request(uint8_t *pkt, uint16_t pkt_len, bool is_sche
                                     sys_log_print_msg("!");
                                     sys_log_new_line();
                                 }
+                            }
+                        }
+                        else
+                        {
+                            if (!sat_data_buf.obdh.data.hibernation_on)
+                            {
+                                (void)send_tc_feedback(pkt, ERRNO_FB_DEVICE_COMM_FAIL);
                             }
                         }
                         vTaskDelay(pdMS_TO_TICKS(25U));
