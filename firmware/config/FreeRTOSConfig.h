@@ -56,7 +56,7 @@
 #define configLFXT_CLOCK_HZ       		( 32768L )
 #define configTICK_RATE_HZ				( ( TickType_t ) 1000 )
 #define configMAX_PRIORITIES			( 5 )
-#define configTOTAL_HEAP_SIZE			( ( size_t ) ( 40 * 1024 ) )
+#define configTOTAL_HEAP_SIZE			( ( size_t ) ( 41 * 1024 ) ) // Alterado de 40 para 41
 #define configMAX_TASK_NAME_LEN			( 20 )
 #define configUSE_TRACE_FACILITY		0
 #define configUSE_16_BIT_TICKS			0
