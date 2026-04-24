@@ -53,11 +53,11 @@
 #define CONFIG_TASK_READ_EDC_ENABLED                    0
 #define CONFIG_TASK_READ_EPS_ENABLED                    1
 #define CONFIG_TASK_READ_TTC_ENABLED                    1
-#define CONFIG_TASK_READ_ANTENNA_ENABLED                0
+#define CONFIG_TASK_READ_ANTENNA_ENABLED                1
 #define CONFIG_TASK_DATA_LOG_ENABLED                    1
 #define CONFIG_TASK_PROCESS_TC_ENABLED                  1
-#define CONFIG_TASK_ANTENNA_DEPLOYMENT_ENABLED          0
-#define CONFIG_TASK_POSITION_DETERMINATION_ENABLED      0
+#define CONFIG_TASK_ANTENNA_DEPLOYMENT_ENABLED          1
+#define CONFIG_TASK_POSITION_DETERMINATION_ENABLED      1
 #define CONFIG_TASK_PAYLOAD_X_ENABLED                   0
 #define CONFIG_TASK_HOUSEKEEPING_ENABLED                1
 #define CONFIG_TASK_MISSION_MANAGER_ENABLED             1
@@ -130,8 +130,8 @@
 #define CONFIG_MEM_ADR_SYS_TIME_BAK                     0x1980U
 #define CONFIG_MEM_ADR_SYS_PARAM_BAK                    0x1900U
 
-#define PAYLOAD_MAX_TRANSMIT 3
-#define PAGE_SIZE           ((uint32_t)256UL)
+//#define PAYLOAD_MAX_TRANSMIT 3
+//#define PAGE_SIZE           ((uint32_t)256UL)
 
 /* Health Check Config Parameters */
 #if defined(CONFIG_HEALTH_CHECK_ENABLED) && (CONFIG_HEALTH_CHECK_ENABLED == 1)
