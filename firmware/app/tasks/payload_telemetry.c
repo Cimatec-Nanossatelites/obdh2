@@ -83,7 +83,7 @@ void vTaskPayloadTelemetry(void *p)
             uint32_t timestamp = system_get_time();
 
             cimatelite_telemetry_t cimatelite_temelemetry;
-            media_read(MEDIA_NOR, (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1) * PAGE_SIZE, &raw_pkt, sizeof(raw_pkt));
+            media_read(MEDIA_NOR, (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1) * PAGE_SIZE, (uint8_t*)&raw_pkt, sizeof(raw_pkt));
             memcpy(&cimatelite_temelemetry, &raw_pkt, sizeof(cimatelite_temelemetry));
 
             if (cimatelite_temelemetry.data.pkt_id > 0)
