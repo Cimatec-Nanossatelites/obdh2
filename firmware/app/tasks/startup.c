@@ -373,15 +373,6 @@ void vTaskStartup(void *p)
     }
 #endif /* CONFIG_DEV_ANTENNA_ENABLED */
 
-#if defined(CONFIG_DEV_PAYLOAD_X_ENABLED) && (CONFIG_DEV_PAYLOAD_X_ENABLED == 1)
-    /* Payload X device initialization */
-    sat_data_buf.payload_x.id = PL_ID_PAYLOAD_X;
-    if (payload_init(PAYLOAD_X) != 0)
-    {
-        error_counter++;
-    }
-#endif /* CONFIG_DEV_PAYLOAD_X_ENABLED */
-
     if (error_counter > 0U)
     {
         sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_STARTUP_NAME, "Boot completed with ");
