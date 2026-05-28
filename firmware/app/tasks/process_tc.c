@@ -1711,7 +1711,7 @@ static void process_tc_set_parameter(uint8_t *pkt, uint16_t pkt_len, bool is_sch
             case SUBSYSTEM_ID_OBDH:
                 if (obdh_set_param(pkt[9], &buf) == 0)
                 {
-                    if ((pkt[9] == OBDH_PARAM_ID_MODE) || (pkt[9] == OBDH_PARAM_ID_MAIN_PAYLOAD_STATE) || (pkt[9] == OBDH_PARAM_ID_SEC_PAYLOAD_STATE))
+                    if ((pkt[9] == OBDH_PARAM_ID_MODE))
                     {
                         /* Waits for Mission Manager notification. [Reuses startup event group to avoid memory usage] */
                         if ((xEventGroupWaitBits(task_startup_status, MISSION_MANAGER_NOTIFICATION_BIT, pdTRUE, pdTRUE, pdMS_TO_TICKS(TASK_PROCESS_TC_MAX_WAIT_TIME_MS)) & MISSION_MANAGER_NOTIFICATION_BIT) != 0U)
@@ -2319,59 +2319,52 @@ static int8_t format_data_request(uint8_t *pkt_pl, uint16_t *pkt_pl_len, uint8_t
         pl[30] = tel->data.initial_hib_executed;
         pl[31] = tel->data.ant_deployment_executed;
         pl[32] = tel->data.hibernation_on;
-        pl[33] = tel->data.main_edc;
-        pl[34] = tel->data.general_telemetry_on;
-        pl[35] = (data_log_page >> 24U) & 0xFFU;
-        pl[36] = (data_log_page >> 16U) & 0xFFU;
-        pl[37] = (data_log_page >> 8U) & 0xFFU;
-        pl[38] = data_log_page & 0xFFU;
-        pl[39] = (tel->data.media.last_page_sbcd_pkts >> 24U) & 0xFFU;
-        pl[40] = (tel->data.media.last_page_sbcd_pkts >> 16U) & 0xFFU;
-        pl[41] = (tel->data.media.last_page_sbcd_pkts >> 8U) & 0xFFU;
-        pl[42] = tel->data.media.last_page_sbcd_pkts & 0xFFU;
-        pl[43] = (tel->data.position.timestamp >> 24U) & 0xFFU;
-        pl[44] = (tel->data.position.timestamp >> 16U) & 0xFFU;
-        pl[45] = (tel->data.position.timestamp >> 8U) & 0xFFU;
-        pl[46] = tel->data.position.timestamp & 0xFFU;
-        pl[47] = (((uint16_t)tel->data.position.latitude) >> 8U) & 0xFFU;
-        pl[48] = ((uint16_t)tel->data.position.latitude) & 0xFFU;
-        pl[49] = (((uint16_t)tel->data.position.longitude) >> 8U) & 0xFFU;
-        pl[50] = ((uint16_t)tel->data.position.longitude) & 0xFFU;
-        pl[51] = (((uint16_t)tel->data.position.altitude) >> 8U) & 0xFFU;
-        pl[52] = ((uint16_t)tel->data.position.altitude) & 0xFFU;
-        pl[53] = (tel->data.position.ts_last_tle_update >> 24U) & 0xFFU;
-        pl[54] = (tel->data.position.ts_last_tle_update >> 16U) & 0xFFU;
-        pl[55] = (tel->data.position.ts_last_tle_update >> 8U) & 0xFFU;
-        pl[56] = tel->data.position.ts_last_tle_update & 0xFFU;
-        pl[57] = (tel->data.ts_read_sensors >> 24U) & 0xFFU;
-        pl[58] = (tel->data.ts_read_sensors >> 16U) & 0xFFU;
-        pl[59] = (tel->data.ts_read_sensors >> 8U) & 0xFFU;
-        pl[60] = tel->data.ts_read_sensors & 0xFFU;
-        pl[61] = tel->data.main_payload_state;
-        pl[62] = tel->data.sec_payload_state;
-        pl[63] = (tel->data.hib_duration >> 24U) & 0xFFU;
-        pl[64] = (tel->data.hib_duration >> 16U) & 0xFFU;
-        pl[65] = (tel->data.hib_duration >> 8U) & 0xFFU;
-        pl[66] = tel->data.hib_duration & 0xFFU;
-        pl[67] = (tel->data.ts_last_contact >> 24U) & 0xFFU;
-        pl[68] = (tel->data.ts_last_contact >> 16U) & 0xFFU;
-        pl[69] = (tel->data.ts_last_contact >> 8U) & 0xFFU;
-        pl[70] = tel->data.ts_last_contact & 0xFFU;
-        pl[71] = (tel->data.batt_crit_level_mv >> 8U) & 0xFFU;
-        pl[72] = tel->data.batt_crit_level_mv & 0xFFU;
-        pl[73] = (tel->data.last_tran_ev_id >> 8U) & 0xFFU;
-        pl[74] = tel->data.last_tran_ev_id & 0xFFU; /**/
-        pl[75] = tel->data.manual_experiments;
-        pl[76] = tel->data.eps_beacon_on;
-        pl[77] = (tel->data.ts_commission_timeout >> 24U) & 0xFFU;
-        pl[78] = (tel->data.ts_commission_timeout >> 16U) & 0xFFU;
-        pl[79] = (tel->data.ts_commission_timeout >> 8U) & 0xFFU;
-        pl[80] = tel->data.ts_commission_timeout & 0xFFU;
-        pl[81] = (tel->data.ts_next_sched_tc >> 24U) & 0xFFU;
-        pl[82] = (tel->data.ts_next_sched_tc >> 16U) & 0xFFU;
-        pl[83] = (tel->data.ts_next_sched_tc >> 8U) & 0xFFU;
-        pl[84] = tel->data.ts_next_sched_tc & 0xFFU;
-        pl[85] = tel->data.tc_queue_size;
+        pl[33] = tel->data.general_telemetry_on;
+        pl[34] = (data_log_page >> 24U) & 0xFFU;
+        pl[35] = (data_log_page >> 16U) & 0xFFU;
+        pl[36] = (data_log_page >> 8U) & 0xFFU;
+        pl[37] = data_log_page & 0xFFU;
+        pl[38] = (tel->data.position.timestamp >> 24U) & 0xFFU;
+        pl[39] = (tel->data.position.timestamp >> 16U) & 0xFFU;
+        pl[40] = (tel->data.position.timestamp >> 8U) & 0xFFU;
+        pl[41] = tel->data.position.timestamp & 0xFFU;
+        pl[42] = (((uint16_t)tel->data.position.latitude) >> 8U) & 0xFFU;
+        pl[43] = ((uint16_t)tel->data.position.latitude) & 0xFFU;
+        pl[44] = (((uint16_t)tel->data.position.longitude) >> 8U) & 0xFFU;
+        pl[45] = ((uint16_t)tel->data.position.longitude) & 0xFFU;
+        pl[46] = (((uint16_t)tel->data.position.altitude) >> 8U) & 0xFFU;
+        pl[47] = ((uint16_t)tel->data.position.altitude) & 0xFFU;
+        pl[48] = (tel->data.position.ts_last_tle_update >> 24U) & 0xFFU;
+        pl[49] = (tel->data.position.ts_last_tle_update >> 16U) & 0xFFU;
+        pl[50] = (tel->data.position.ts_last_tle_update >> 8U) & 0xFFU;
+        pl[51] = tel->data.position.ts_last_tle_update & 0xFFU;
+        pl[52] = (tel->data.ts_read_sensors >> 24U) & 0xFFU;
+        pl[53] = (tel->data.ts_read_sensors >> 16U) & 0xFFU;
+        pl[54] = (tel->data.ts_read_sensors >> 8U) & 0xFFU;
+        pl[55] = tel->data.ts_read_sensors & 0xFFU;
+        pl[56] = (tel->data.hib_duration >> 24U) & 0xFFU;
+        pl[57] = (tel->data.hib_duration >> 16U) & 0xFFU;
+        pl[58] = (tel->data.hib_duration >> 8U) & 0xFFU;
+        pl[59] = tel->data.hib_duration & 0xFFU;
+        pl[60] = (tel->data.ts_last_contact >> 24U) & 0xFFU;
+        pl[61] = (tel->data.ts_last_contact >> 16U) & 0xFFU;
+        pl[62] = (tel->data.ts_last_contact >> 8U) & 0xFFU;
+        pl[63] = tel->data.ts_last_contact & 0xFFU;
+        pl[64] = (tel->data.batt_crit_level_mv >> 8U) & 0xFFU;
+        pl[65] = tel->data.batt_crit_level_mv & 0xFFU;
+        pl[66] = (tel->data.last_tran_ev_id >> 8U) & 0xFFU;
+        pl[67] = tel->data.last_tran_ev_id & 0xFFU; /**/
+        pl[68] = tel->data.manual_experiments;
+        pl[69] = tel->data.eps_beacon_on;
+        pl[70] = (tel->data.ts_commission_timeout >> 24U) & 0xFFU;
+        pl[71] = (tel->data.ts_commission_timeout >> 16U) & 0xFFU;
+        pl[72] = (tel->data.ts_commission_timeout >> 8U) & 0xFFU;
+        pl[73] = tel->data.ts_commission_timeout & 0xFFU;
+        pl[74] = (tel->data.ts_next_sched_tc >> 24U) & 0xFFU;
+        pl[75] = (tel->data.ts_next_sched_tc >> 16U) & 0xFFU;
+        pl[76] = (tel->data.ts_next_sched_tc >> 8U) & 0xFFU;
+        pl[77] = tel->data.ts_next_sched_tc & 0xFFU;
+        pl[78] = tel->data.tc_queue_size;
         (void)memcpy(&pl[86], tel->data.position.bin_tle, 50U);
 
         *pkt_pl_len = (uint16_t)144U; /* 7b RQ CALLSIGN + 1b TC ID + 136b OBDH DATA */
