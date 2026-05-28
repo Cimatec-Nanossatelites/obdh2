@@ -365,32 +365,6 @@ void vTaskStartup(void *p)
         error_counter++;
     }
 
-#if defined(CONFIG_DEV_PAYLOAD_EDC_ENABLED) && (CONFIG_DEV_PAYLOAD_EDC_ENABLED == 1)
-    /* Payload EDC device initialization */
-    sat_data_buf.edc_0.id = PL_ID_EDC_1;
-    sat_data_buf.edc_1.id = PL_ID_EDC_2;
-
-    if (payload_init(PAYLOAD_EDC_1) != 0)
-    {
-        error_counter++;
-    }
-
-    if (payload_disable(PAYLOAD_EDC_1) != 0)
-    {
-        error_counter++;
-    }
-
-    if (payload_init(PAYLOAD_EDC_0) != 0)
-    {
-        error_counter++;
-    }
-
-    if (payload_disable(PAYLOAD_EDC_0) != 0)
-    {
-        error_counter++;
-    }
-#endif /* CONFIG_DEV_PAYLOAD_EDC_ENABLED */
-
 #if defined(CONFIG_DEV_ANTENNA_ENABLED) && (CONFIG_DEV_ANTENNA_ENABLED == 1)
     /* Antenna device initialization */
     if (antenna_init() != 0)
