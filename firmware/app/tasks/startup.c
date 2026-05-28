@@ -120,18 +120,6 @@ static void sys_log_print_obdh_parameters(obdh_telemetry_t *params)
     sys_log_print_uint(params->timestamp);
     sys_log_new_line();
 
-    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Main EDC: ");
-    sys_log_print_hex((uint32_t)params->data.main_edc);
-    sys_log_new_line();
-
-    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Main payload state: ");
-    sys_log_print_hex((uint32_t)params->data.main_payload_state);
-    sys_log_new_line();
-
-    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Secondary payload state: ");
-    sys_log_print_hex((uint32_t)params->data.sec_payload_state);
-    sys_log_new_line();
-
     sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Battery Critical Level: ");
     sys_log_print_uint((uint32_t)params->data.batt_crit_level_mv);
     sys_log_print_msg(" mV");
