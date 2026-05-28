@@ -2365,9 +2365,9 @@ static int8_t format_data_request(uint8_t *pkt_pl, uint16_t *pkt_pl_len, uint8_t
         pl[76] = (tel->data.ts_next_sched_tc >> 8U) & 0xFFU;
         pl[77] = tel->data.ts_next_sched_tc & 0xFFU;
         pl[78] = tel->data.tc_queue_size;
-        (void)memcpy(&pl[86], tel->data.position.bin_tle, 50U);
+        (void)memcpy(&pl[79], tel->data.position.bin_tle, 50U);
 
-        *pkt_pl_len = (uint16_t)144U; /* 7b RQ CALLSIGN + 1b TC ID + 136b OBDH DATA */
+        *pkt_pl_len = (uint16_t)88U; /* 7b RQ CALLSIGN + 1b TC ID + 80b OBDH DATA */
 
         break;
     }
