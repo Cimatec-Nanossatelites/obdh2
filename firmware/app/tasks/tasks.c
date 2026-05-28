@@ -49,7 +49,6 @@
 #include "read_sensors.h"
 #include "general_telemetry.h"
 #include "time_control.h"
-#include "read_edc.h"
 #include "read_eps.h"
 #include "read_ttc.h"
 #include "read_antenna.h"
@@ -144,15 +143,6 @@ void create_tasks(void)
         /* Error creating the time control task */
     }
 #endif /* CONFIG_TASK_BEACON_ENABLED */
-
-#if defined(CONFIG_TASK_READ_EDC_ENABLED) && (CONFIG_TASK_READ_EDC_ENABLED == 1)
-    (void)xTaskCreate(vTaskReadEDC, TASK_READ_EDC_NAME, TASK_READ_EDC_STACK_SIZE, NULL, TASK_READ_EDC_PRIORITY, &xTaskReadEDCHandle);
-
-    if (xTaskReadEDCHandle == NULL)
-    {
-        /* Error creating the read EDC task */
-    }
-#endif /* CONFIG_TASK_READ_EDC_ENABLED */
 
 #if defined(CONFIG_TASK_READ_EPS_ENABLED) && (CONFIG_TASK_READ_EPS_ENABLED == 1)
     (void)xTaskCreate(vTaskReadEPS, TASK_READ_EPS_NAME, TASK_READ_EPS_STACK_SIZE, NULL, TASK_READ_EPS_PRIORITY, &xTaskReadEPSHandle);
