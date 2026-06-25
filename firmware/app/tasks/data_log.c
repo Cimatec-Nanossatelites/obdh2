@@ -196,26 +196,6 @@ void vTaskDataLog(void *p)
 
         (void) memset(&page_buf[0], 0, 256);
 
-        /* EDC data */
-        (void)memcpy(&page_buf[0], (void*)sat_data_buf.state.c_edc, sizeof(edc_telemetry_t));
-        if (mem_mng_write_data_to_flash_page(page_buf, &sat_data_buf.obdh.data.media.last_page_edc_data, nor_info.page_size, CONFIG_MEM_EDC_DATA_START_PAGE, CONFIG_MEM_EDC_DATA_END_PAGE) == 0)
-        {
-            sys_log_print_event_from_module(
-                    SYS_LOG_INFO, TASK_DATA_LOG_NAME,
-                    "Writing to EDC sector, flash page number: ");
-            sys_log_print_hex(sat_data_buf.obdh.data.media.last_page_edc_data);
-            sys_log_new_line();
-        }
-        else
-        {
-            sys_log_print_event_from_module(
-                    SYS_LOG_ERROR, TASK_DATA_LOG_NAME,
-                    "Error writing the EDC data to the flash memory!");
-            sys_log_new_line();
-        }
-
-        (void) memset(&page_buf[0], 0, 256);
-
         /* Cimatelite Data */
         (void) memcpy(&page_buf[0], &sat_data_buf.cimatelite,
                       sizeof(cimatelite_telemetry_t));
