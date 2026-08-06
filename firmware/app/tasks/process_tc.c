@@ -2106,10 +2106,10 @@ static void process_tc_receive_pcd_payload_packet(uint8_t *pkt,
         sys_log_print_uint(sat_data_buf.cimatelite.data.battery);
         sys_log_new_line();
 
-        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
-                                        "Wind Direction: ");
-        sys_log_print_uint(sat_data_buf.cimatelite.data.wind_direction);
-        sys_log_new_line();
+//        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
+//                                        "Wind Direction: ");
+//        sys_log_print_uint(sat_data_buf.cimatelite.data.wind_direction);
+//        sys_log_new_line();
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                         "Rainfall: ");
@@ -2123,7 +2123,7 @@ static void process_tc_receive_pcd_payload_packet(uint8_t *pkt,
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,
                                         "Humidity: ");
-        sys_log_print_uint(sat_data_buf.cimatelite.data.humidity);
+        sys_log_print_uint(sat_data_buf.cimatelite.data.air_humidity);
         sys_log_new_line();
 
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_PROCESS_TC_NAME,

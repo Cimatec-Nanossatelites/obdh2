@@ -141,19 +141,13 @@ void vTaskPayloadTelemetry(void *p)
                 gen_tel_pl.payload[pl_index++] =
                         cimatelite_telemetry.data.wind_speed & 0xFFU;
 
+                // wind direction
                 for (uint8_t histogram_index = 0U; histogram_index < 8U;
                         histogram_index++)
                 {
-                    gen_tel_pl.payload[payload_index++] =
+                    gen_tel_pl.payload[pl_index++] =
                             cimatelite_telemetry.data.wind_direction_histogram[histogram_index];
                 }
-
-                // wind_direction
-                gen_tel_pl.payload[pl_index++] =
-                        (cimatelite_telemetry.data.wind_direction >> 8U)
-                                & 0xFFU;
-                gen_tel_pl.payload[pl_index++] =
-                        cimatelite_telemetry.data.wind_direction & 0xFFU;
 
                 // temperature (int16_t)
                 gen_tel_pl.payload[pl_index++] =
