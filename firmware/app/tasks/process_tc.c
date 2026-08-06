@@ -2601,64 +2601,79 @@ static int8_t format_data_request(uint8_t *pkt_pl, uint16_t *pkt_pl_len, uint8_t
 
     case DATA_ID_PAYLOAD_CIMATELITE:
     {
-        cimatelite_telemetry_t *tel = (cimatelite_telemetry_t *)data; // cppcheck-suppress misra-c2012-11.5
+        cimatelite_telemetry_t *tel = (cimatelite_telemetry_t*) data; /* cppcheck-suppress misra-c2012-11.5 */
+
         uint8_t *pl = pkt_pl;
+        uint16_t pl_index = 0U;
 
-        // timestamp (sys_time_t -> assumindo uint32_t)
-        pl[0] = (tel->timestamp >> 24U) & 0xFFU;
-        pl[1] = (tel->timestamp >> 16U) & 0xFFU;
-        pl[2] = (tel->timestamp >> 8U) & 0xFFU;
-        pl[3] = tel->timestamp & 0xFFU;
+        // timestamp do cubesat
+        pl[pl_index++] = (uint8_t) ((tel->timestamp >> 24U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) ((tel->timestamp >> 16U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) ((tel->timestamp >> 8U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) (tel->timestamp & 0xFFU);
 
+        // pcd_uid
+        pl[pl_index++] = (uint8_t) ((tel->data.pcd_uid >> 8U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) (tel->data.pcd_uid & 0xFFU);
         // pkt_id
-        pl[4] = (tel->data.pkt_id >> 24U) & 0xFFU;
-        pl[5] = (tel->data.pkt_id >> 16U) & 0xFFU;
-        pl[6] = (tel->data.pkt_id >> 8U) & 0xFFU;
-        pl[7] = tel->data.pkt_id & 0xFFU;
+        pl[pl_index++] = (uint8_t) ((tel->data.pkt_id >> 8U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) (tel->data.pkt_id & 0xFFU);
 
-        // timestamp
-        pl[8] = (tel->data.timestamp >> 24U) & 0xFFU;
-        pl[9] = (tel->data.timestamp >> 16U) & 0xFFU;
-        pl[10] = (tel->data.timestamp >> 8U) & 0xFFU;
-        pl[11] = tel->data.timestamp & 0xFFU;
+        // timestamp interno
+        pl[pl_index++] = (uint8_t) ((tel->data.timestamp >> 24U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) ((tel->data.timestamp >> 16U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) ((tel->data.timestamp >> 8U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) (tel->data.timestamp & 0xFFU);
 
         // battery
-        pl[12] = (tel->data.battery >> 8U) & 0xFFU;
-        pl[13] = tel->data.battery & 0xFFU;
+        pl[pl_index++] = (uint8_t) ((tel->data.battery >> 8U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) (tel->data.battery & 0xFFU);
 
-        // wind_speed (uint32_t por enquanto)
-        pl[14] = (tel->data.wind_speed >> 24U) & 0xFFU;
-        pl[15] = (tel->data.wind_speed >> 16U) & 0xFFU;
-        pl[16] = (tel->data.wind_speed >> 8U) & 0xFFU;
-        pl[17] = tel->data.wind_speed & 0xFFU;
+        // wind_speed
+        pl[pl_index++] = (uint8_t) ((tel->data.wind_speed >> 24U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) ((tel->data.wind_speed >> 16U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) ((tel->data.wind_speed >> 8U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) (tel->data.wind_speed & 0xFFU);
 
-        // wind_direction
-        pl[18] = (tel->data.wind_direction >> 8U) & 0xFFU;
-        pl[19] = tel->data.wind_direction & 0xFFU;
-
-        // rainfall (uint32_t por enquanto)
-        pl[20] = (tel->data.rainfall >> 24U) & 0xFFU;
-        pl[21] = (tel->data.rainfall >> 16U) & 0xFFU;
-        pl[22] = (tel->data.rainfall >> 8U) & 0xFFU;
-        pl[23] = tel->data.rainfall & 0xFFU;
-
-        // ground_humidity
-        pl[24] = (tel->data.ground_humidity >> 8U) & 0xFFU;
-        pl[25] = tel->data.ground_humidity & 0xFFU;
-
-        // humidity
-        pl[26] = (tel->data.humidity >> 8U) & 0xFFU;
-        pl[27] = tel->data.humidity & 0xFFU;
+        // wind_direction_histogram[8]
+        for (uint8_t histogram_index = 0U; histogram_index < 8U;
+                histogram_index++)
+        {
+            pl[pl_index++] =
+                    tel->data.wind_direction_histogram[histogram_index];
+        }
 
         // temperature (int16_t)
-        pl[28] = ((uint16_t)tel->data.temperature >> 8U) & 0xFFU;
-        pl[29] = (uint16_t)tel->data.temperature & 0xFFU;
+        pl[pl_index++] = (uint8_t) (((uint16_t) tel->data.temperature >> 8U)
+                & 0xFFU);
+        pl[pl_index++] = (uint8_t) ((uint16_t) tel->data.temperature & 0xFFU);
+
+        // rainfall
+        pl[pl_index++] = (uint8_t) ((tel->data.rainfall >> 24U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) ((tel->data.rainfall >> 16U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) ((tel->data.rainfall >> 8U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) (tel->data.rainfall & 0xFFU);
+
+        // ground_humidity
+        pl[pl_index++] = (uint8_t) ((tel->data.ground_humidity >> 8U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) (tel->data.ground_humidity & 0xFFU);
+
+        // air_humidity
+        pl[pl_index++] = (uint8_t) ((tel->data.air_humidity >> 8U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) (tel->data.air_humidity & 0xFFU);
 
         // co2
-        pl[30] = (tel->data.co2 >> 8U) & 0xFFU;
-        pl[31] = tel->data.co2 & 0xFFU;
+        pl[pl_index++] = (uint8_t) ((tel->data.co2 >> 8U) & 0xFFU);
+        pl[pl_index++] = (uint8_t) (tel->data.co2 & 0xFFU);
 
-        *pkt_pl_len = 32U; // tamanho total do payload
+        // air_pressure
+        pl[pl_index++] = tel->data.air_pressure;
+
+        // solar_radiation_w_m2
+        pl[pl_index++] = tel->data.solar_radiation_w_m2;
+
+        // Tamanho total: 4 bytes do timestamp do cubesat + 36 bytes de PCD_data_T
+        *pkt_pl_len = pl_index;
 
         break;
     }

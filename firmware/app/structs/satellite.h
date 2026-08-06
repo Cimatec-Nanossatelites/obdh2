@@ -214,18 +214,21 @@ typedef struct
  * \brief PCD data buffer.
  */
 
-typedef struct
+typedef struct __attribute__((packed))
 {
-    uint32_t pkt_id;
+    uint16_t pcd_uid;
+    uint16_t pkt_id;
     uint32_t timestamp;
     uint16_t battery;
-    uint32_t wind_speed; //todo: Deve ser float
-    uint16_t wind_direction;
-    uint32_t rainfall; //todo: Deve ser float
-    uint16_t ground_humidity;
-    uint16_t humidity;
+    uint32_t wind_speed;
+    uint8_t wind_direction_histogram[8];
     int16_t temperature;
+    uint32_t rainfall;
+    uint16_t ground_humidity;
+    uint16_t air_humidity;
     uint16_t co2;
+    uint8_t air_pressure;
+    uint8_t solar_radiation_w_m2;
 } PCD_data_T;
 
 /**

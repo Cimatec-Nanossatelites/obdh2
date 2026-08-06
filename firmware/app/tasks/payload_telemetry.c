@@ -47,8 +47,6 @@
 #include "payload_telemetry.h"
 #include "startup.h"
 
-
-
 xTaskHandle xTaskPayloadTelemetryHandle;
 
 void vTaskPayloadTelemetry(void *p)
@@ -81,107 +79,128 @@ void vTaskPayloadTelemetry(void *p)
             CONFIG_SATELLITE_CALLSIGN);
 
             uint32_t timestamp = system_get_time();
+            uint16_t pl_index = 0;
 
-            cimatelite_telemetry_t cimatelite_temelemetry;
-            media_read(MEDIA_NOR, (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1) * PAGE_SIZE, (uint8_t*)&raw_pkt, sizeof(raw_pkt));
-            memcpy(&cimatelite_temelemetry, &raw_pkt, sizeof(cimatelite_temelemetry));
+            cimatelite_telemetry_t cimatelite_telemetry;
+            media_read(
+                    MEDIA_NOR,
+                    (sat_data_buf.obdh.data.media.last_page_cimatelite_data - 1)
+                            * PAGE_SIZE,
+                    (uint8_t*) &raw_pkt, sizeof(raw_pkt));
+            memcpy(&cimatelite_telemetry, &raw_pkt,
+                   sizeof(cimatelite_telemetry));
 
-            if (cimatelite_temelemetry.data.pkt_id > 0)
+            if (cimatelite_telemetry.data.pkt_id > 0)
             {
 
                 //timestamp
-                gen_tel_pl.payload[0] = (cimatelite_temelemetry.timestamp
+                gen_tel_pl.payload[pl_index++] = (cimatelite_telemetry.timestamp
                         >> 24U) & 0xFFU;
-                gen_tel_pl.payload[1] = (cimatelite_temelemetry.timestamp
+                gen_tel_pl.payload[pl_index++] = (cimatelite_telemetry.timestamp
                         >> 16U) & 0xFFU;
-                gen_tel_pl.payload[2] =
-                        (cimatelite_temelemetry.timestamp >> 8U) & 0xFFU;
-                gen_tel_pl.payload[3] = cimatelite_temelemetry.timestamp
+                gen_tel_pl.payload[pl_index++] = (cimatelite_telemetry.timestamp
+                        >> 8U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] = cimatelite_telemetry.timestamp
                         & 0xFFU;
+
+                //pcd_uid
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.pcd_uid >> 8U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        cimatelite_telemetry.data.pcd_uid & 0xFFU;
 
                 // pkt_id
-                gen_tel_pl.payload[4] = (cimatelite_temelemetry.data.pkt_id
-                        >> 24U) & 0xFFU;
-                gen_tel_pl.payload[5] = (cimatelite_temelemetry.data.pkt_id
-                        >> 16U) & 0xFFU;
-                gen_tel_pl.payload[6] = (cimatelite_temelemetry.data.pkt_id
-                        >> 8U) & 0xFFU;
-                gen_tel_pl.payload[7] = cimatelite_temelemetry.data.pkt_id
-                        & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.pkt_id >> 8U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        cimatelite_telemetry.data.pkt_id & 0xFFU;
 
                 // timestamp
-                gen_tel_pl.payload[8] = (cimatelite_temelemetry.data.timestamp
-                        >> 24U) & 0xFFU;
-                gen_tel_pl.payload[9] = (cimatelite_temelemetry.data.timestamp
-                        >> 16U) & 0xFFU;
-                gen_tel_pl.payload[10] = (cimatelite_temelemetry.data.timestamp
-                        >> 8U) & 0xFFU;
-                gen_tel_pl.payload[11] = cimatelite_temelemetry.data.timestamp
-                        & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.timestamp >> 24U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.timestamp >> 16U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.timestamp >> 8U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        cimatelite_telemetry.data.timestamp & 0xFFU;
 
                 // battery
-                gen_tel_pl.payload[12] = (cimatelite_temelemetry.data.battery
-                        >> 8U) & 0xFFU;
-                gen_tel_pl.payload[13] = cimatelite_temelemetry.data.battery
-                        & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.battery >> 8U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        cimatelite_telemetry.data.battery & 0xFFU;
 
                 // wind_speed (uint32_t por enquanto)
-                gen_tel_pl.payload[14] =
-                        (cimatelite_temelemetry.data.wind_speed >> 24U)
-                                & 0xFFU;
-                gen_tel_pl.payload[15] =
-                        (cimatelite_temelemetry.data.wind_speed >> 16U)
-                                & 0xFFU;
-                gen_tel_pl.payload[16] =
-                        (cimatelite_temelemetry.data.wind_speed >> 8U) & 0xFFU;
-                gen_tel_pl.payload[17] = cimatelite_temelemetry.data.wind_speed
-                        & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.wind_speed >> 24U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.wind_speed >> 16U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.wind_speed >> 8U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        cimatelite_telemetry.data.wind_speed & 0xFFU;
+
+                for (uint8_t histogram_index = 0U; histogram_index < 8U;
+                        histogram_index++)
+                {
+                    gen_tel_pl.payload[payload_index++] =
+                            cimatelite_telemetry.data.wind_direction_histogram[histogram_index];
+                }
 
                 // wind_direction
-                gen_tel_pl.payload[18] =
-                        (cimatelite_temelemetry.data.wind_direction >> 8U)
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.wind_direction >> 8U)
                                 & 0xFFU;
-                gen_tel_pl.payload[19] =
-                        cimatelite_temelemetry.data.wind_direction & 0xFFU;
-
-                // rainfall (uint32_t por enquanto)
-                gen_tel_pl.payload[20] = (cimatelite_temelemetry.data.rainfall
-                        >> 24U) & 0xFFU;
-                gen_tel_pl.payload[21] = (cimatelite_temelemetry.data.rainfall
-                        >> 16U) & 0xFFU;
-                gen_tel_pl.payload[22] = (cimatelite_temelemetry.data.rainfall
-                        >> 8U) & 0xFFU;
-                gen_tel_pl.payload[23] = cimatelite_temelemetry.data.rainfall
-                        & 0xFFU;
-
-                // ground_humidity
-                gen_tel_pl.payload[24] =
-                        (cimatelite_temelemetry.data.ground_humidity >> 8U)
-                                & 0xFFU;
-                gen_tel_pl.payload[25] =
-                        cimatelite_temelemetry.data.ground_humidity & 0xFFU;
-
-                // humidity
-                gen_tel_pl.payload[26] = (cimatelite_temelemetry.data.humidity
-                        >> 8U) & 0xFFU;
-                gen_tel_pl.payload[27] = cimatelite_temelemetry.data.humidity
-                        & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        cimatelite_telemetry.data.wind_direction & 0xFFU;
 
                 // temperature (int16_t)
-                gen_tel_pl.payload[28] =
-                        ((uint16_t) cimatelite_temelemetry.data.temperature
-                                >> 8U) & 0xFFU;
-                gen_tel_pl.payload[29] =
-                        (uint16_t) cimatelite_temelemetry.data.temperature
+                gen_tel_pl.payload[pl_index++] =
+                        ((uint16_t) cimatelite_telemetry.data.temperature >> 8U)
+                                & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        (uint16_t) cimatelite_telemetry.data.temperature
                                 & 0xFFU;
 
+                // rainfall (uint32_t por enquanto)
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.rainfall >> 24U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.rainfall >> 16U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.rainfall >> 8U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        cimatelite_telemetry.data.rainfall & 0xFFU;
+
+                // ground_humidity
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.ground_humidity >> 8U)
+                                & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        cimatelite_telemetry.data.ground_humidity & 0xFFU;
+
+                // air humidity
+                gen_tel_pl.payload[pl_index++] =
+                        (cimatelite_telemetry.data.air_humidity >> 8U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] =
+                        cimatelite_telemetry.data.air_humidity & 0xFFU;
+
                 // co2
-                gen_tel_pl.payload[30] =
-                        (cimatelite_temelemetry.data.co2 >> 8U) & 0xFFU;
-                gen_tel_pl.payload[31] = cimatelite_temelemetry.data.co2
+                gen_tel_pl.payload[pl_index++] = (cimatelite_telemetry.data.co2
+                        >> 8U) & 0xFFU;
+                gen_tel_pl.payload[pl_index++] = cimatelite_telemetry.data.co2
                         & 0xFFU;
 
-                gen_tel_pl.length = 32U; // tamanho total do payload
+                //air pressure
+                gen_tel_pl.payload[pl_index++] =
+                        cimatelite_telemetry.data.air_pressure & 0xFFU;
+
+                //solar radiation
+                gen_tel_pl.payload[pl_index++] =
+                        cimatelite_telemetry.data.solar_radiation_w_m2 & 0xFFU;
+
+                gen_tel_pl.length = pl_index; // tamanho total do payload
 
                 uint8_t gen_tel_pl_raw[120] = { 0 };
                 uint16_t gen_tel_pl_raw_len = 0;
